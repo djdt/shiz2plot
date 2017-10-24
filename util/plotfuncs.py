@@ -2,24 +2,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def labelpeaks(labels, traces):
-    xys = []
-    # else:  # Just take the max of each event
-    last_event = None
-    for ev in traces:
-        max_index = np.argmax(ev['responses'])
-        rtime = ev['times'][max_index]
-        height = ev['responses'][max_index]
+def labelpeaks(labeldata, traces):
+    for label, event in labeldata:
+        xy = []
+        for trace in filter(lambda x: x['event'] == event, traces):
+            max_index = np.argmax(trace['responses'])
+            rtime = trace['times'][max_index]
+            height = trace['responses'][max_index]
 
-        if ev['event'] == last_event:
-            if height > xys[-1][1]:
-                xys[-1] = (rtime, height)
-        else:
-            xys.append((rtime, height))
-        last_event = ev['event']
-
-    for j, label in enumerate(labels):
-        plt.annotate(label, xy=xys[j], xytext=(0, 5),
+            # Get the max height of all traces
+            if height > xy[1]:
+                xy = (rtime, height)
+        # Annotate 5pt above the peak
+        plt.annotate(label, xy=xy, xytext=(0, 5),
                      xycoords='data', textcoords='offset points',
                      va='bottom', ha='center')
 

@@ -67,6 +67,7 @@ def parse_args(args):
                         metavar='<text>:<x>,<y>[:<arrow>:<x>,<y>]',
                         help='Add text to cromatogram, optional marker.')
     parser.add_argument('--labelpeaks', nargs='+',
+                        metavar='<label>[:<event>]',
                         help='Label largest peak per event.')
     parser.add_argument('--detectpeaks', nargs=3,
                         metavar='<type> <event> <channel>',
@@ -75,8 +76,6 @@ def parse_args(args):
                         help='Add a legend with optional names.')
     parser.add_argument('--smooth', nargs='*', metavar='<kind> <num>',
                         help='Interpolate and smooth plots.')
-    parser.add_argument('--peaks', type=int, const=10000, nargs='?',
-                        help='Perform peak detection above specified height.')
     args = parser.parse_args(args)
     if args.smooth is not None:
         if len(args.smooth) == 0:
@@ -93,6 +92,18 @@ def parse_args(args):
                 parser.error('Invalid annotation format for ' + arg)
             annotations.append(tokens)
         args.annotate = annotations
+    if args.labelpeaks is not None:
+        peaks = []
+        last_index = -1
+        for arg in args.labelpeaks:
+            tokens = re.split(':', arg)
+            if len(tokens) > 2:
+                parser.error('Invalid label format for ' + arg)
+            text = tokens[0]
+            index = int(tokens[1] if len(tokens) > 1 else last_index + 1)
+            last_index = index
+            peaks.append([text, index])
+        args.labelpeals = peaks
     if args.legend is not None:
         legends = []
         last_index = -1
@@ -199,15 +210,10 @@ for i, (ax, f) in enumerate(zip(axes, args['infile'])):
                               c=color, **plot_kw)
         ax_handles.append(handle)
 
-        # Perform peak detection if needed
-        if args['peaks']:
-            peaks.detect_peaks(ax, data, args['peaks'])
-
     # Make sure axis is not empty
     if plotted == 0:
         print(('Trying to create empty axis for \'{}\', '
-              'check your filters.').format(
-            f))
+              'check your filters.').format(f))
         sys.exit(1)
 
     # Setup ticks
@@ -229,11 +235,9 @@ for i, (ax, f) in enumerate(zip(axes, args['infile'])):
                     xytext=(-5, -5), textcoords='offset points',
                     fontsize=10, ha='right', va='top')
 
-
 # Label the peaks, requires TIC and event per peak
 if args['labelpeaks']:
-    plotfuncs.labelpeaks(
-        args['labelpeaks'],
+    plotfuncs.labelpeaks(args['labelpeaks'],
         filter(lambda x: x['type'] in args['type'], data['traces']))
 
 # Add any annotations
