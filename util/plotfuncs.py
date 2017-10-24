@@ -4,8 +4,10 @@ import numpy as np
 
 def labelpeaks(labeldata, traces):
     for label, event in labeldata:
-        xy = []
-        for trace in filter(lambda x: x['event'] == event, traces):
+        xy = [0, 0]
+        for trace in traces:
+            if trace['event'] != event:
+                continue
             max_index = np.argmax(trace['responses'])
             rtime = trace['times'][max_index]
             height = trace['responses'][max_index]

@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from parsers import shiz, thermo, waters
-from util import colors, latex, peaks, smooth, plotfuncs
+from util import colors, latex, smooth, plotfuncs
 
 plt.rc('text', usetex=True)
 plt.rc('pgf', rcfonts=False)
@@ -94,7 +94,7 @@ def parse_args(args):
         args.annotate = annotations
     if args.labelpeaks is not None:
         peaks = []
-        last_index = -1
+        last_index = 0
         for arg in args.labelpeaks:
             tokens = re.split(':', arg)
             if len(tokens) > 2:
@@ -103,7 +103,7 @@ def parse_args(args):
             index = int(tokens[1] if len(tokens) > 1 else last_index + 1)
             last_index = index
             peaks.append([text, index])
-        args.labelpeals = peaks
+        args.labelpeaks = peaks
     if args.legend is not None:
         legends = []
         last_index = -1
@@ -237,8 +237,8 @@ for i, (ax, f) in enumerate(zip(axes, args['infile'])):
 
 # Label the peaks, requires TIC and event per peak
 if args['labelpeaks']:
-    plotfuncs.labelpeaks(args['labelpeaks'],
-        filter(lambda x: x['type'] in args['type'], data['traces']))
+    traces = filter(lambda x: x['type'] in args['type'], data['traces'])
+    plotfuncs.labelpeaks(args['labelpeaks'], list(traces))
 
 # Add any annotations
 if args['annotate']:
