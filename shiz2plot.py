@@ -10,7 +10,6 @@ import numpy as np
 
 from parsers import shiz, thermo, waters
 from util import colors, latex, peaks, smooth, plotfuncs
-from util.sharedy import set_shared_ylabel
 
 plt.rc('text', usetex=True)
 plt.rc('pgf', rcfonts=False)
@@ -248,7 +247,7 @@ if args['legend'] is not None:
 # Hack for pgf not recognising none as labelcolor
 if args['outfile'] and args['outfile'].endswith('pgf'):
     axes[0].set_xlabel(xlabel)
-    set_shared_ylabel(ylabel, axes, fig)
+    plotfuncs.set_shared_ylabel(ylabel, axes, fig)
     plt.ylabel(ylabel)
 else:
     fig.add_subplot(111, frameon=False)
