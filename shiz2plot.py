@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import argparse
-import itertools
 import re
 import sys
 
@@ -21,18 +20,22 @@ base16_colors = ['#4271ae', '#f5871f', '#c82829',
                  '#8959a8', '#eab700', '#718c00', '#3e999f']
 
 
-def parse_filter(parser, arg):
-    filter = {'type': [], 'event': [], 'channel': [], 'file': []}
-    tokens = re.split(':', arg)
-    if len(tokens) != 2:
-        parser.error('Invalid annotation format for filter ' + arg)
+def parse_filter(parser, args):
+    filter_args = []
+    for arg in args:
+        filter = {'type': [], 'event': [], 'channel': [], 'file': []}
+        tokens = re.split(':', arg)
+        if len(tokens) != 2:
+            parser.error('Invalid annotation format for filter ' + arg)
 
-    for key in filter.keys():
-        m = re.search('(' + key[0] + '|' + key + ')([\d\,]+)', tokens[1])
-        if m is not None:
-            filter[key] = [int(x) for x in m.group(2).split(',')]
+        for key in filter.keys():
+            m = re.search('(' + key[0] + '|' + key + ')([\d\,]+)',
+                          tokens[1])
+            if m is not None:
+                filter[key] = [int(x) for x in m.group(2).split(',')]
 
-    return [tokens[0], filter]
+        filter_args.append([tokens[0], filter])
+    return filter_args
 
 
 def parse_args(args):
@@ -86,6 +89,8 @@ def parse_args(args):
     parser.add_argument('--legend', nargs='*', metavar='<text>[:<filer>]',
                         help='Add a legend with optional names.')
     # Processing
+    parser.add_argument('--shift', nargs='+', metavar='<shift>[:<filter>]',
+                        help='Shift traces along x axis.')
     parser.add_argument('--detectpeaks', nargs='+',
                         metavar='<filter>',
                         help='Detect peaks for labelling.')
@@ -108,15 +113,11 @@ def parse_args(args):
             annotations.append(tokens)
         args.annotate = annotations
     if args.labelpeaks is not None:
-        peaks = []
-        for arg in args.labelpeaks:
-            peaks.append(parse_filter(parser, arg))
-        args.labelpeaks = peaks
+            args.labelpeaks = parse_filter(parser, args.labelpeaks)
     if args.legend is not None:
-        legends = []
-        for arg in args.legend:
-            peaks.append(parse_filter(parser, arg))
-        args.legend = legends
+            args.legend = parse_filter(parser, args.legend)
+    if args.shift is not None:
+        args.shift = parse_filter(parser, args.shift)
     return vars(args)
 
 
@@ -124,7 +125,6 @@ args = parse_args(sys.argv[1:])
 
 # Setup colors
 colors = colors.get_colors('base16', args['colors'])
-iter_colors = itertools.cycle(colors)
 
 # Setup limits and labels
 xlabel = 'Time (\\si{\\minute})'
@@ -167,11 +167,12 @@ if len(args['infile']) == 1:
 elif args['overlay']:
     axes = [axes for x in args['infile']]
 
+total_plotted = 0
 handles = []
 for i, (ax, f) in enumerate(zip(axes, args['infile'])):
     file_format = None
     with open(f) as fp:
-        for i in range(10):
+        for l in range(10):
             line = fp.readline()
             if 'LabSolutions' in line:
                 file_format = 'shimadzu'
@@ -214,7 +215,19 @@ for i, (ax, f) in enumerate(zip(axes, args['infile'])):
         elif args['colorby'] == 'file':
             color = colors[i % len(colors)]
         else:  # 'trace'
-            color = next(iter_colors)
+            color = colors[(total_plotted + plotted) % len(colors)]
+
+        if args['shift']:
+            for shift in args['shift']:
+                if shift[1]['file'] and i not in shift[1]['file']:
+                    continue
+                if shift[1]['type'] and ev['type'] not in shift[1]['type']:
+                    continue
+                if shift[1]['channel'] and ev['channel'] not in shift[1]['channel']:
+                    continue
+                if shift[1]['event'] and ev['event'] not in shift[1]['event']:
+                    continue
+                ev['times'] += float(shift[0])
 
         if args['smooth']:
             handle, = smooth.plot(ax, args['smooth'][0], args['smooth'][1],
@@ -233,6 +246,7 @@ for i, (ax, f) in enumerate(zip(axes, args['infile'])):
         print(('Trying to create empty axis for \'{}\', '
               'check your filters.').format(f))
         sys.exit(1)
+    total_plotted += plotted
 
     # Setup ticks
     ax.ticklabel_format(axis='y', style='sci', scilimits=(-1, 3))
