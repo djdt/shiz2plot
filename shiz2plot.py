@@ -267,7 +267,7 @@ if args['legend'] is not None:
 
 # Hack for pgf not recognising none as labelcolor
 if args['outfile'] and args['outfile'].endswith('pgf'):
-    axes[0].set_xlabel(xlabel)
+    plt.xlabel(xlabel)
     plotfuncs.set_shared_ylabel(ylabel, axes, fig)
 else:
     fig.add_subplot(111, frameon=False)
