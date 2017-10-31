@@ -53,17 +53,19 @@ def annotate(annotations):
 def legend(legends, axhandles):
     handles, labels = [], []
     for text, filter in legends:
-        for handle, handle_filter in axhandles:
-            if handle_filter['type'] not in filter['type']:
+        for handle, h_filter in axhandles:
+            if filter['type'] and h_filter['type'] not in filter['type']:
                 continue
-            if handle_filter['event'] not in filter['event']:
+            if filter['event'] and h_filter['event'] not in filter['event']:
                 continue
-            if handle_filter['channel'] not in filter['channel']:
+            if filter['channel'] and \
+               h_filter['channel'] not in filter['channel']:
                 continue
-            if handle_filter['file'] not in filter['file']:
+            if filter['file'] and h_filter['file'] not in filter['file']:
                 continue
-            handles.append(handle[0])
+            handles.append(handle)
             labels.append(text)
+            break
 
     plt.legend(handles=handles, labels=labels,
                framealpha=1.0, fancybox=False)
