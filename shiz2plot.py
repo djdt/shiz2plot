@@ -21,14 +21,28 @@ base16_colors = ['#4271ae', '#f5871f', '#c82829',
                  '#8959a8', '#eab700', '#718c00', '#3e999f']
 
 
+def parse_filter(parser, arg):
+    filter = {'type': [], 'event': [], 'channel': [], 'file': []}
+    tokens = re.split(':', arg)
+    if len(tokens) != 2:
+        parser.error('Invalid annotation format for filter ' + arg)
+
+    for key in filter.keys():
+        m = re.search('(' + key[0] + '|' + key + ')([\d\,]+)', tokens[1])
+        if m is not None:
+            filter[key] = [int(x) for x in m.group(2).split(',')]
+
+    return [tokens[0], filter]
+
+
 def parse_args(args):
     parser = argparse.ArgumentParser(
         description='Plots chromatography data.')
     # Input / output
     parser.add_argument('infile', nargs='+')
-    parser.add_argument('-f', '--format', default='shimadzu',
-                        choices=['shimadzu', 'waters', 'thermo'],
-                        help='Input file format.')
+    # parser.add_argument('-f', '--format', default='shimadzu',
+    #                     choices=['shimadzu', 'waters', 'thermo'],
+    #                     help='Input file format.')
     parser.add_argument('-o', '--outfile',
                         help='Output filename and format.')
     parser.add_argument('-S', '--noshow', action='store_true',
@@ -62,18 +76,19 @@ def parse_args(args):
     parser.add_argument('-t', '--type', choices=['tic', 'mrm'], nargs='+',
                         default=['tic', 'mrm'],
                         help='Show event of these types.')
-    # Processing
+    # Text
     parser.add_argument('--annotate', nargs='+',
                         metavar='<text>:<x>,<y>[:<arrow>:<x>,<y>]',
                         help='Add text to cromatogram, optional marker.')
     parser.add_argument('--labelpeaks', nargs='+',
-                        metavar='<label>[:<event>]',
-                        help='Label largest peak per event.')
-    parser.add_argument('--detectpeaks', nargs=3,
-                        metavar='<type> <event> <channel>',
-                        help='Detect peaks for labelling.')
-    parser.add_argument('--legend', nargs='*', metavar='<text>[:<handle>]',
+                        metavar='<label>[:<filter>]',
+                        help='Label largest peak in filter.')
+    parser.add_argument('--legend', nargs='*', metavar='<text>[:<filer>]',
                         help='Add a legend with optional names.')
+    # Processing
+    parser.add_argument('--detectpeaks', nargs='+',
+                        metavar='<filter>',
+                        help='Detect peaks for labelling.')
     parser.add_argument('--smooth', nargs='*', metavar='<kind> <num>',
                         help='Interpolate and smooth plots.')
     args = parser.parse_args(args)
@@ -94,27 +109,13 @@ def parse_args(args):
         args.annotate = annotations
     if args.labelpeaks is not None:
         peaks = []
-        last_index = 0
         for arg in args.labelpeaks:
-            tokens = re.split(':', arg)
-            if len(tokens) > 2:
-                parser.error('Invalid label format for ' + arg)
-            text = tokens[0]
-            index = int(tokens[1] if len(tokens) > 1 else last_index + 1)
-            last_index = index
-            peaks.append([text, index])
+            peaks.append(parse_filter(parser, arg))
         args.labelpeaks = peaks
     if args.legend is not None:
         legends = []
-        last_index = -1
         for arg in args.legend:
-            tokens = re.split(':', arg)
-            if len(tokens) > 2:
-                parser.error('Invalid legend format for ' + arg)
-            text = tokens[0]
-            index = int(tokens[1] if len(tokens) > 1 else last_index + 1)
-            last_index = index
-            legends.append([text, index])
+            peaks.append(parse_filter(parser, arg))
         args.legend = legends
     return vars(args)
 
@@ -166,14 +167,28 @@ if len(args['infile']) == 1:
 elif args['overlay']:
     axes = [axes for x in args['infile']]
 
-ax_handles = []
+handles = []
 for i, (ax, f) in enumerate(zip(axes, args['infile'])):
-    if args['format'] == 'shimadzu':
+    file_format = None
+    with open(f) as fp:
+        for i in range(10):
+            line = fp.readline()
+            if 'LabSolutions' in line:
+                file_format = 'shimadzu'
+                break
+            elif 'Chromeleon' in line:
+                file_format = 'thermo'
+                break
+        fp.close()
+    if file_format == 'shimadzu':
         data = shiz.parse(f)
-    elif args['format'] == 'waters':
-        data = waters.parse(f)
-    elif args['format'] == 'thermo':
+    elif file_format == 'thermo':
         data = thermo.parse(f)
+    elif file_format == 'waters':
+        data = waters.parse(f)
+    else:
+        print('Unsupported file format')
+        sys.exit(1)
 
     plotted = 0
     # Plot the data
@@ -208,7 +223,10 @@ for i, (ax, f) in enumerate(zip(axes, args['infile'])):
         else:
             handle, = ax.plot(ev['times'], ev['responses'],
                               c=color, **plot_kw)
-        ax_handles.append(handle)
+            handles.append([handle, {'type': ev['type'],
+                                     'event': ev['event'],
+                                     'channel': ev['channel'],
+                                     'file': i}])
 
     # Make sure axis is not empty
     if plotted == 0:
@@ -235,10 +253,9 @@ for i, (ax, f) in enumerate(zip(axes, args['infile'])):
                     xytext=(-5, -5), textcoords='offset points',
                     fontsize=10, ha='right', va='top')
 
-# Label the peaks, requires TIC and event per peak
-if args['labelpeaks']:
-    traces = filter(lambda x: x['type'] in args['type'], data['traces'])
-    plotfuncs.labelpeaks(args['labelpeaks'], list(traces))
+    # Label the peaks, requires TIC and event per peak
+    if args['labelpeaks']:
+        plotfuncs.labelpeaks(args['labelpeaks'], i, axes, data['traces'])
 
 # Add any annotations
 if args['annotate']:
@@ -246,13 +263,12 @@ if args['annotate']:
 
 # Add legend
 if args['legend'] is not None:
-    plotfuncs.legend(args['legend'], ax_handles)
+    plotfuncs.legend(args['legend'], handles)
 
 # Hack for pgf not recognising none as labelcolor
 if args['outfile'] and args['outfile'].endswith('pgf'):
     axes[0].set_xlabel(xlabel)
     plotfuncs.set_shared_ylabel(ylabel, axes, fig)
-    plt.ylabel(ylabel)
 else:
     fig.add_subplot(111, frameon=False)
     plt.tick_params(labelcolor='none',
