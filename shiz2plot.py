@@ -266,14 +266,13 @@ if args['legend'] is not None:
     plotfuncs.legend(args['legend'], handles)
 
 # Hack for pgf not recognising none as labelcolor
+plt.xlabel(xlabel)
 if args['outfile'] and args['outfile'].endswith('pgf'):
-    plt.xlabel(xlabel)
     plotfuncs.set_shared_ylabel(ylabel, axes, fig)
 else:
     fig.add_subplot(111, frameon=False)
     plt.tick_params(labelcolor='none',
                     top='off', bottom='off', left='off', right='off')
-    plt.xlabel(xlabel)
     plt.ylabel(ylabel)
 
 plt.tight_layout()
