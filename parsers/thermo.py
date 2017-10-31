@@ -14,7 +14,7 @@ def parse(filename):
         while line:
             if line.startswith('Injection Information:'):
                 # Extract sample info
-                while not line.startswith('\n'):
+                while not line.startswith(','):
                     info = line.split(delim)
                     if info[0] == 'Injection':
                         data['sample'] = info[1].rstrip()
@@ -29,7 +29,7 @@ def parse(filename):
                 line = fp.readline()
                 # Read data
                 times, resps = [], []
-                while line and not line.startswith('\n'):
+                while line and not line.startswith(','):
                     row = re.split(
                         '''{delim}(?=(?:[^'"]|'[^']*'|"[^"]*")*$)'''.format(
                            delim=delim), line)
