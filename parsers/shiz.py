@@ -5,7 +5,7 @@ import re
 name_regex = re.compile('m/z(.)(\d).*?([\d\.]+)>([\d\.]+)')
 
 
-def parse(filename):
+def parse(filename, fileno=0):
     data = {'sample': None, 'id': None, 'traces': []}
     with open(filename) as fp:
         line = fp.readline()  # Skip header
@@ -56,6 +56,7 @@ def parse(filename):
                                   trace_type == trace['type']:
                         channel += 1
                 data['traces'].append({
+                    'file': fileno,
                     'type': trace_type, 'mode': ion_mode,
                     'event': event, 'channel': channel,
                     'precursor': precursor, 'product': product,

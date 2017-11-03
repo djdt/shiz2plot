@@ -5,7 +5,7 @@ import re
 split_re = re.compile(''',(?=(?:[^'"]|'[^']*'|"[^"]*")*$)''')
 
 
-def parse(filename):
+def parse(filename, fileno):
     data = {'sample': None, 'id': None, 'traces': []}
     event = 0
     with open(filename) as fp:
@@ -46,6 +46,7 @@ def parse(filename):
                     if precursor == trace['precursor']:
                         channel += 1
                 data['traces'].append({
+                    'file': fileno,
                     'type': 'tic', 'mode': '-',
                     'event': event, 'channel': channel,
                     'precursor': precursor, 'product': product,

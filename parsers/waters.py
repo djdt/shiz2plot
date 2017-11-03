@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def parse(filename):
+def parse(filename, fileno):
     data = {'sample': None, 'id': None, 'traces': []}
     event = 0
     with open(filename) as fp:
@@ -33,6 +33,7 @@ def parse(filename):
                     line = fp.readline()
 
                 data['traces'].append({
+                    'file': fileno,
                     'event': event, 'channel': channel,
                     'precursor': precursor, 'product': product,
                     'times': np.array(ts, dtype=float),
