@@ -1,31 +1,26 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+import filters
 
-def labelpeaks(labeldata, file_no, axes, traces):
+
+def labelpeaks(labeldata, axes, traces):
     for label, filter in labeldata:
+        fileno = 0
         xy = [0, 0]
-        if filter['file'] and file_no not in filter['file']:
-            continue
         for trace in traces:
-            if filter['type'] and trace['type'] not in filter['type']:
-                continue
-            if filter['channel'] and \
-               trace['channel'] not in filter['channel']:
-                continue
-            if filter['event'] and trace['event'] not in filter['event']:
-                continue
-
-            max_index = np.argmax(trace['responses'])
-            rtime = trace['times'][max_index]
-            height = trace['responses'][max_index]
+            if filters.filter_item(filter, trace):
+                max_index = np.argmax(trace['responses'])
+                rtime = trace['times'][max_index]
+                height = trace['responses'][max_index]
 
             # Get the max height of all traces
             if height > xy[1]:
                 xy = (rtime, height)
+                fileno = trace['file']
         # Annotate 5pt above the peak
         if xy != [0, 0]:
-            axes[file_no].annotate(
+            axes[fileno].annotate(
                     label, xy=xy, xytext=(0, 5),
                     xycoords='data', textcoords='offset points',
                     va='bottom', ha='center')
@@ -54,18 +49,10 @@ def legend(legends, axhandles):
     handles, labels = [], []
     for text, filter in legends:
         for handle, h_filter in axhandles:
-            if filter['type'] and h_filter['type'] not in filter['type']:
-                continue
-            if filter['event'] and h_filter['event'] not in filter['event']:
-                continue
-            if filter['channel'] and \
-               h_filter['channel'] not in filter['channel']:
-                continue
-            if filter['file'] and h_filter['file'] not in filter['file']:
-                continue
-            handles.append(handle)
-            labels.append(text)
-            break
+            if filters.filter_item(filter, h_filter):
+                handles.append(handle)
+                labels.append(text)
+                break
 
     plt.legend(handles=handles, labels=labels,
                framealpha=1.0, fancybox=False)

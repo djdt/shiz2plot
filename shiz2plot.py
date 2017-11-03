@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from parsers import shiz, thermo, waters
-from util import colors, latex, smooth, plotfuncs
+from util import colors, filters, latex, smooth, plotfuncs
 
 plt.rc('text', usetex=True)
 plt.rc('pgf', rcfonts=False)
@@ -20,29 +20,13 @@ base16_colors = ['#4271ae', '#f5871f', '#c82829',
                  '#8959a8', '#eab700', '#718c00', '#3e999f']
 
 
-def parse_filter(parser, args):
-    filter_args = []
-    for arg in args:
-        filter = {'type': [], 'event': [], 'channel': [], 'file': []}
-        tokens = re.split(':', arg)
-        if len(tokens) != 2:
-            parser.error('Invalid annotation format for filter ' + arg)
-
-        for key in filter.keys():
-            m = re.search('(' + key[0] + '|' + key + ')([\d\,]+)',
-                          tokens[1])
-            if m is not None:
-                filter[key] = [int(x) for x in m.group(2).split(',')]
-
-        filter_args.append([tokens[0], filter])
-    return filter_args
-
-
 def parse_args(args):
     parser = argparse.ArgumentParser(
         description='Plots chromatography data.')
     # Input / output
-    parser.add_argument('infile', nargs='+')
+    parser.add_argument('infile', nargs='+',
+                        metavar='<file>[:<option>,<value>]',
+                        help='Input files and options.')
     # parser.add_argument('-f', '--format', default='shimadzu',
     #                     choices=['shimadzu', 'waters', 'thermo'],
     #                     help='Input file format.')
@@ -89,14 +73,29 @@ def parse_args(args):
     parser.add_argument('--legend', nargs='*', metavar='<text>[:<filer>]',
                         help='Add a legend with optional names.')
     # Processing
-    parser.add_argument('--shift', nargs='+', metavar='<shift>[:<filter>]',
-                        help='Shift traces along x axis.')
+    # parser.add_argument('--shift', nargs='+', metavar='<shift>[:<filter>]',
+    #                     help='Shift traces along x axis.')
     parser.add_argument('--detectpeaks', nargs='+',
                         metavar='<filter>',
                         help='Detect peaks for labelling.')
     parser.add_argument('--smooth', nargs='*', metavar='<kind> <num>',
                         help='Interpolate and smooth plots.')
+
     args = parser.parse_args(args)
+    if args.infile is not None:
+        infiles = []
+        for arg in args.infile:
+            options = {"scalex": None, "scaley": None,
+                       "shiftx": None, "shifty": None}
+            tokens = re.split(':', arg)
+            if len(tokens) > 1:
+                # parser.error('Invalid format for infile ' + arg)
+                for token in tokens[1:]:
+                    option, value = re.split(',', token)
+                    options[option] = value
+            infiles.append([tokens[0], options])
+        args.infile = infiles
+
     if args.smooth is not None:
         if len(args.smooth) == 0:
             args.smooth = ['cubic', 300]
@@ -113,11 +112,11 @@ def parse_args(args):
             annotations.append(tokens)
         args.annotate = annotations
     if args.labelpeaks is not None:
-            args.labelpeaks = parse_filter(parser, args.labelpeaks)
+            args.labelpeaks = filters.parse(args.labelpeaks)
     if args.legend is not None:
-            args.legend = parse_filter(parser, args.legend)
-    if args.shift is not None:
-        args.shift = parse_filter(parser, args.shift)
+            args.legend = filters.parse(args.legend)
+    # if args.shift is not None:
+    #     args.shift = parse_filter(parser, args.shift)
     return vars(args)
 
 
@@ -169,7 +168,8 @@ elif args['overlay']:
 
 total_plotted = 0
 handles = []
-for i, (ax, f) in enumerate(zip(axes, args['infile'])):
+for i, (ax, (f, options)) in enumerate(zip(axes, args['infile'])):
+    # Detemine file format
     file_format = None
     with open(f) as fp:
         for l in range(10):
@@ -181,18 +181,19 @@ for i, (ax, f) in enumerate(zip(axes, args['infile'])):
                 file_format = 'thermo'
                 break
         fp.close()
+    # Parse input file
     if file_format == 'shimadzu':
-        data = shiz.parse(f)
+        data = shiz.parse(f, i)
     elif file_format == 'thermo':
-        data = thermo.parse(f)
+        data = thermo.parse(f, i)
     elif file_format == 'waters':
-        data = waters.parse(f)
+        data = waters.parse(f, i)
     else:
         print('Unsupported file format')
         sys.exit(1)
 
-    plotted = 0
     # Plot the data
+    plotted = 0
     for ev in data['traces']:
         # Filter out unwanted data
         if args['events'] and ev['event'] not in args['events']:
@@ -217,17 +218,17 @@ for i, (ax, f) in enumerate(zip(axes, args['infile'])):
         else:  # 'trace'
             color = colors[(total_plotted + plotted) % len(colors)]
 
-        if args['shift']:
-            for shift in args['shift']:
-                if shift[1]['file'] and i not in shift[1]['file']:
-                    continue
-                if shift[1]['type'] and ev['type'] not in shift[1]['type']:
-                    continue
-                if shift[1]['channel'] and ev['channel'] not in shift[1]['channel']:
-                    continue
-                if shift[1]['event'] and ev['event'] not in shift[1]['event']:
-                    continue
-                ev['times'] += float(shift[0])
+        # Apply any options
+        if options['shiftx'] is not None:
+            ev['times'] += float(options['shiftx'])
+        if options['shifty'] is not None:
+            ev['responses'] += float(options['shifty'])
+        if options['scalex'] is not None:
+            np.multiply(ev['times'], float(options['scalex']),
+                        out=ev['times'], casting='unsafe')
+        if options['scaley'] is not None:
+            np.multiply(ev['responses'], float(options['scaley']),
+                        out=ev['responses'], casting='unsafe')
 
         if args['smooth']:
             handle, = smooth.plot(ax, args['smooth'][0], args['smooth'][1],
@@ -269,14 +270,14 @@ for i, (ax, f) in enumerate(zip(axes, args['infile'])):
 
     # Label the peaks, requires TIC and event per peak
     if args['labelpeaks']:
-        plotfuncs.labelpeaks(args['labelpeaks'], i, axes, data['traces'])
+        plotfuncs.labelpeaks(args['labelpeaks'], axes, data['traces'])
 
 # Add any annotations
 if args['annotate']:
     plotfuncs.annotate(args['annotate'])
 
 # Add legend
-if args['legend'] is not None:
+if args['legend']:
     plotfuncs.legend(args['legend'], handles)
 
 # Hack for pgf not recognising none as labelcolor
