@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
+import matplotlib.transforms as mtransforms
 import numpy as np
 
-import filters
+import util.filters as filters
 
 
 def labelpeaks(labeldata, axes, traces):
@@ -9,6 +10,7 @@ def labelpeaks(labeldata, axes, traces):
         fileno = 0
         xy = [0, 0]
         for trace in traces:
+            height = 0
             if filters.filter_item(filter, trace):
                 max_index = np.argmax(trace['responses'])
                 rtime = trace['times'][max_index]
@@ -59,15 +61,21 @@ def legend(legends, axhandles):
 
 
 def set_shared_ylabel(ylabel, axes, figure):
+    bottom, top = .1, .9
+    avepos = (bottom+top)/2
+    axes[0].yaxis.label.set_transform(mtransforms.blended_transform_factory(
+           mtransforms.IdentityTransform(), figure.transFigure # specify x, y transform
+           )) # changed from default blend (IdentityTransform(), axes[0].transAxes)
+    axes[0].yaxis.label.set_position((0, avepos))
     axes[0].set_ylabel(ylabel)
-    for ax in axes[1:]:
-        ax.set_ylabel('')
-    # Calculate center of plots
-    top = axes[0].get_position().y1
-    bot = axes[-1].get_position().y0
-    ypos = (bot + top) / 2.0
+    # for ax in axes[1:]:
+    #     ax.set_ylabel('')
+    # # Calculate center of plots
+    # top = axes[0].get_position().y0
+    # bot = axes[-1].get_position().y1
+    # ypos = (bot + top) / 2.0
 
-    # Calculate the x pos after transform
-    xpos = axes[0].get_position().x0 / 2.0
+    # # Calculate the x pos after transform
+    # xpos = axes[0].get_position().x0 / 2.0
 
-    axes[0].yaxis.set_label_coords(xpos, ypos, transform=figure.transFigure)
+    # axes[0].yaxis.set_label_coords(xpos, ypos, transform=figure.transFigure)
