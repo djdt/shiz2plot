@@ -23,16 +23,15 @@ base16_colors = ['#4271ae', '#f5871f', '#c82829',
 def parse_args(args):
     parser = argparse.ArgumentParser(
         description='Plots chromatography data.',
-        epiloge='Filter format examples:\n'
-                '\tf1 -- file 1'
-                '\tfile2event1 -- file 2 event 1'
-                '\tf1e1c0 -- file 1 event 1 channel 0'
-                '\tt0     -- type tic'
-                '\tt1     -- type mrm')
+        epilog='Filters are formatted as a stting of options and numbers. '
+               'Options are: f[ile] e[vent] c[hannel] t[ype] '
+               'precursor product. '
+               'for type options 0=tic, 1=mrm. An example filter: f1t0c0')
     # Input / output
     parser.add_argument('infile', nargs='+',
                         metavar='<file>[:<option>,<value>]',
-                        help='Input files and options.')
+                        help='Input files and options. '
+                             'Options are scale(x|y) shift(x|y).')
     # parser.add_argument('-f', '--format', default='shimadzu',
     #                     choices=['shimadzu', 'waters', 'thermo'],
     #                     help='Input file format.')
