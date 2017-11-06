@@ -24,7 +24,9 @@ def parse(args):
 def filter_item(filter, item):
     if filter['file'] and item['file'] not in filter['file']:
         return False
-    if filter['type'] and item['type'] not in filter['type']:
+    if filter['type'] and item['type'] == 'tic' and 1 in filter['type']:
+        return False
+    if filter['type'] and item['type'] == 'mrm' and 0 in filter['type']:
         return False
     if filter['channel'] and item['channel'] not in filter['channel']:
         return False

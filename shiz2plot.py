@@ -22,7 +22,13 @@ base16_colors = ['#4271ae', '#f5871f', '#c82829',
 
 def parse_args(args):
     parser = argparse.ArgumentParser(
-        description='Plots chromatography data.')
+        description='Plots chromatography data.',
+        epiloge='Filter format examples:\n'
+                '\tf1 -- file 1'
+                '\tfile2event1 -- file 2 event 1'
+                '\tf1e1c0 -- file 1 event 1 channel 0'
+                '\tt0     -- type tic'
+                '\tt1     -- type mrm')
     # Input / output
     parser.add_argument('infile', nargs='+',
                         metavar='<file>[:<option>,<value>]',
