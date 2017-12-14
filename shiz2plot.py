@@ -10,12 +10,15 @@ import numpy as np
 from parsers import shiz, thermo, waters
 from util import colors, filters, latex, smooth, plotfuncs
 
+# LaTeX parameters used for plotting to pgf and pdf
 plt.rc('text', usetex=True)
 plt.rc('pgf', rcfonts=False)
 plt.rcParams['text.latex.preamble'] = ['\\usepackage{siunitx}']
 plt.rcParams['pgf.preamble'] = ['\\usepackage{siunitx}',
                                 '\\sisetup{detect-all, math-rm=\\mathsf}']
 
+# Default color scheme,
+# blue, orange, red, magenta, yellow, green, cyan
 base16_colors = ['#4271ae', '#f5871f', '#c82829',
                  '#8959a8', '#eab700', '#718c00', '#3e999f']
 
@@ -160,12 +163,14 @@ if args['plotkeyword']:
             plot_kw['linewidth'] = float(val[0])
 
 
+# Assign axes
 fig, axes = plt.subplots(1 if args['overlay'] else len(args['infile']),
                          figsize=latex.size(*args['scale']),
                          sharex=True, sharey=True,
                          subplot_kw=subplot_kw,
                          gridspec_kw={'wspace': 0, 'hspace': 0})
 
+# Convert axes to array if needed, for overlay just repeat first axes
 if len(args['infile']) == 1:
     axes = [axes]
 elif args['overlay']:
