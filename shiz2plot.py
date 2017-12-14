@@ -35,9 +35,6 @@ def parse_args(args):
                         metavar='<file>[:<option>,<value>]',
                         help='Input files and options. '
                              'Options are scale(x|y) shift(x|y).')
-    # parser.add_argument('-f', '--format', default='shimadzu',
-    #                     choices=['shimadzu', 'waters', 'thermo'],
-    #                     help='Input file format.')
     parser.add_argument('-o', '--outfile',
                         help='Output filename and format.')
     parser.add_argument('-S', '--noshow', action='store_true',
@@ -81,8 +78,6 @@ def parse_args(args):
     parser.add_argument('--legend', nargs='*', metavar='<text>[:<filer>]',
                         help='Add a legend with optional names.')
     # Processing
-    # parser.add_argument('--shift', nargs='+', metavar='<shift>[:<filter>]',
-    #                     help='Shift traces along x axis.')
     parser.add_argument('--detectpeaks', nargs='+',
                         metavar='<filter>',
                         help='Detect peaks for labelling.')
