@@ -7,7 +7,7 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
-from parsers import shiz, thermo, waters
+from parsers import shiz
 from util import colors, filters, latex, smooth, plotfuncs
 
 # LaTeX parameters used for plotting to pgf and pdf
@@ -28,8 +28,9 @@ def parse_args(args):
         description='Plots chromatography data.',
         epilog='Filters are formatted as a stting of options and numbers. '
                'Options are: f[ile] e[vent] c[hannel] t[ype] '
-               'precursor product. '
-               'for type options 0=tic, 1=mrm. An example filter: f1t0c0')
+               'p[recursor] product|d. '
+               'for type options 0=tic, 1=mrm. '
+               'An example filter: f1,2t0c0')
     # Input / output
     parser.add_argument('infile', nargs='+',
                         metavar='<file>[:<option>,<value>]',
@@ -57,17 +58,19 @@ def parse_args(args):
     parser.add_argument('--names', nargs='*',
                         help='The names of the subplots.')
     # Filtering
-    parser.add_argument('-e', '--events', type=int, nargs='+',
-                        help='Events to plot.')
-    parser.add_argument('-c', '--channels', type=int, nargs='+',
-                        help='Channels to plot.')
-    parser.add_argument('-p', '--precursors', type=float, nargs='+',
-                        help='precursor ions to plot.')
-    parser.add_argument('-d', '--products', type=float, nargs='+',
-                        help='product ions to plot.')
-    parser.add_argument('-t', '--type', choices=['tic', 'mrm'], nargs='+',
-                        default=['tic', 'mrm'],
-                        help='Show event of these types.')
+    parser.add_argument('-f', '--filter', type=str,
+                        help='Filter data before plotting.')
+    # parser.add_argument('-e', '--events', type=int, nargs='+',
+    #                     help='Events to plot.')
+    # parser.add_argument('-c', '--channels', type=int, nargs='+',
+    #                     help='Channels to plot.')
+    # parser.add_argument('-p', '--precursors', type=float, nargs='+',
+    #                     help='precursor ions to plot.')
+    # parser.add_argument('-d', '--products', type=float, nargs='+',
+    #                     help='product ions to plot.')
+    # parser.add_argument('-t', '--type', choices=['tic', 'mrm'], nargs='+',
+    #                     default=['tic', 'mrm'],
+    #                     help='Show event of these types.')
     # Text
     parser.add_argument('--annotate', nargs='+',
                         metavar='<text>:<x>,<y>[:<arrow>:<x>,<y>]',
@@ -99,6 +102,8 @@ def parse_args(args):
             infiles.append([tokens[0], options])
         args.infile = infiles
 
+    if args.filter is not None:
+        args.filter = filters.parse(args.filter)
     if args.smooth is not None:
         if len(args.smooth) == 0:
             args.smooth = ['cubic', 300]
@@ -121,6 +126,9 @@ def parse_args(args):
     # if args.shift is not None:
     #     args.shift = parse_filter(parser, args.shift)
     return vars(args)
+
+
+# def main():
 
 
 args = parse_args(sys.argv[1:])
@@ -182,17 +190,15 @@ for i, (ax, (f, options)) in enumerate(zip(axes, args['infile'])):
             if 'LabSolutions' in line:
                 file_format = 'shimadzu'
                 break
-            elif 'Chromeleon' in line:
-                file_format = 'thermo'
-                break
+            # elif 'Chromeleon' in line:
+            #     file_format = 'thermo'
+            #     break
         fp.close()
     # Parse input file
     if file_format == 'shimadzu':
         data = shiz.parse(f, i)
-    elif file_format == 'thermo':
-        data = thermo.parse(f, i)
-    elif file_format == 'waters':
-        data = waters.parse(f, i)
+    # elif file_format == 'thermo':
+    #     data = thermo.parse(f, i)
     else:
         print('Unsupported file format')
         sys.exit(1)
@@ -201,19 +207,18 @@ for i, (ax, (f, options)) in enumerate(zip(axes, args['infile'])):
     plotted = 0
     for ev in data['traces']:
         # Filter out unwanted data
-        if args['events'] and ev['event'] not in args['events']:
-            continue
-        if args['channels'] and ev['channel'] not in args['channels']:
-            continue
-        if args['precursors'] and ev['precursor'] not in args['precursors']:
-            continue
-        if args['products'] and ev['product'] not in args['products']:
-            continue
-        if args['type'] and ev['type'] not in args['type']:
+        skip = False
+        if args['filter'] is not None:
+            for key, val in args['filter'].items():
+                if val and ev[key] not in val:
+                    skip = True
+                    break
+        if skip:
             continue
 
         plotted = plotted + 1
 
+        # Determine color for current trace
         if args['colorby'] == 'channel':
             color = colors[ev['channel'] % len(colors)]
         elif args['colorby'] == 'event':
@@ -242,10 +247,10 @@ for i, (ax, (f, options)) in enumerate(zip(axes, args['infile'])):
         else:
             handle, = ax.plot(ev['times'], ev['responses'],
                               c=color, **plot_kw)
-            handles.append([handle, {'type': ev['type'],
-                                     'event': ev['event'],
-                                     'channel': ev['channel'],
-                                     'file': i}])
+        handles.append([handle, {'type': ev['type'],
+                                 'event': ev['event'],
+                                 'channel': ev['channel'],
+                                 'file': i}])
 
     # Make sure axis is not empty
     if plotted == 0:
@@ -273,9 +278,9 @@ for i, (ax, (f, options)) in enumerate(zip(axes, args['infile'])):
                     xytext=(-5, -5), textcoords='offset points',
                     fontsize=10, ha='right', va='top')
 
-    # Label the peaks, requires TIC and event per peak
-    if args['labelpeaks']:
-        plotfuncs.labelpeaks(args['labelpeaks'], axes, data['traces'])
+# Label the peaks, requires TIC and event per peak
+if args['labelpeaks']:
+    plotfuncs.labelpeaks(args['labelpeaks'], axes, data['traces'])
 
 # Add any annotations
 if args['annotate']:

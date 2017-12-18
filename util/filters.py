@@ -1,29 +1,32 @@
 import re
 
 
+FILTER_DICT = {'file': 'f',
+               'type': 't',
+               'event': 'e',
+               'channel': 'c',
+               'precursor': 'p',
+               'product': 'd'}
 TYPE_DICT = {0: 'mrm', 1: 'tic'}
 
 
-def parse(args):
+def parse(fstring):
+    filter = {'file': [], 'type': [],
+              'event': [], 'channel': [],
+              'precursor': [], 'product': []}
+    for key in filter.keys():
+        m = re.search('({short}|{long})([\d\,]+)'.format(
+            short=FILTER_DICT[key], long=key), fstring)
+        if m is not None:
+            filter[key].extend([int(x) for x in m.group(2).split(',')])
+    return filter
+
+
+def parse_args_list(args):
     filter_args = []
     for arg in args:
-        filter = {'file': [], 'type': [],
-                  'event': [], 'channel': [],
-                  'precursor': [], 'product': []}
         tokens = re.split(':', arg)
-        if len(tokens) != 2:
-            raise Exception('Invalid annotation format for filter ' + arg)
-
-        for key in filter.keys():
-            m = re.search('(' + key[0] + '|' + key + ')([\d\,]+)',
-                          tokens[1])
-            if m is not None:
-                if key is 'type':
-                    filter[key] = [
-                            TYPE_DICT[int(x)] for x in m.group(2).split(',')]
-                else:
-                    filter[key] = [int(x) for x in m.group(2).split(',')]
-
+        filter = parse(tokens[1])
         filter_args.append([tokens[0], filter])
     return filter_args
 
