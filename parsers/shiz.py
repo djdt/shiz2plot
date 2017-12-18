@@ -5,6 +5,9 @@ import re
 name_regex = re.compile('m/z(.)(\d).*?([\d\.]+)>([\d\.]+)')
 
 
+# Types: 0 = TIC, 1 = MRM
+
+
 def parse(filename, fileno=0):
     data = {'sample': None, 'id': None, 'traces': []}
     with open(filename) as fp:
@@ -29,13 +32,13 @@ def parse(filename, fileno=0):
                 ion_mode = m_type.group(3)
                 # Check if MRM or TIC
                 if m_type.group(4) == 'TIC':
-                    trace_type = 'tic'
+                    trace_type = 0
                     precursor, product = None, None
                 else:
-                    trace_type = 'mrm'
+                    trace_type = 1
                     m_mrm = re.match('m/z\ ([\d\.]+)>([\d\.]+)',
                                      m_type.group(4))
-                    precursor = float(m_mrm.group(1)),
+                    precursor = float(m_mrm.group(1))
                     product = float(m_mrm.group(2))
                 # Skip unwanted
                 while not line.startswith('R.Time'):
