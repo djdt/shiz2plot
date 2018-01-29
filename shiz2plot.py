@@ -130,7 +130,6 @@ def parse_args(args):
 
 # def main():
 
-
 args = parse_args(sys.argv[1:])
 
 # Setup colors
@@ -176,8 +175,41 @@ fig, axes = plt.subplots(1 if args['overlay'] else len(args['infile']),
 # Convert axes to array if needed, for overlay just repeat first axes
 if len(args['infile']) == 1:
     axes = [axes]
-elif args['overlay']:
+if args['overlay']:
+    # for _ in range(1, len(args['infile'])):
+    #     axes.append(fig.add_subplot(1, 1, 1))
     axes = [axes for x in args['infile']]
+
+
+current_ax = 0
+
+
+def press(event):
+    global current_ax
+    if event.key == 'a':
+        for ax in axes:
+            ax.set_visible(True)
+        current_ax = 0
+        plt.draw()
+        return
+    elif event.key == 'n':
+        current_ax += 1
+        if current_ax >= len(axes):
+            current_ax = len(axes) - 1
+    elif event.key == 'b':
+        current_ax -= 1
+        if current_ax < 0:
+            current_ax = 0
+    else:
+        return
+
+    for ax in axes:
+        ax.set_visible(False)
+    axes[current_ax].set_visible(True)
+    plt.draw()
+
+
+# fig.canvas.mpl_connect('key_press_event', press)
 
 total_plotted = 0
 handles = []
