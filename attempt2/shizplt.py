@@ -1,44 +1,13 @@
 #!/usr/bin/env python3
 
 import argparse
-import re
+import chrom
 
 # Input files into an array
 
 # Make a class for data
 # filename
 # options
-
-class ChromPlotOptions(object):
-    """Stores per-file options for plotting.
-    """
-    def __init__(self, name=None, axis=None,
-                 scale=[1.0, 1.0], shift=[0.0, 0.0]):
-        self.name = name
-        self.axis = None
-        self.scale = scale
-        self.shift = shift
-
-    def parse(self, string: str):
-        """Format is <filename>[:<option>=<value>[,...]]
-        Valid options are axis, name, scale ((x, y)), shift ((x, y))."""
-        # Clean up input
-        string = string.strip().replace(' ', '').lower()
-
-        tokens = re.split('\,(?![\d\.]*[\)\]])', string)
-
-        for token in tokens:
-            key, val = token.split('=')
-            if key == 'name':
-                self.name = val
-            elif key == 'axis':
-                self.axis = int(val)
-            elif key == 'scale':
-                self.scale = [float(x) for x in
-                              val.strip('[]').split(',')]
-            elif key == 'shift':
-                self.shift = [float(x) for x in
-                              val.strip('[]').split(',')]
 
 
 def parse_args(args):
@@ -71,8 +40,10 @@ def parse_args(args):
     # parser.add_argument('--names', nargs='*',
     #                     help='The names of the subplots.')
     # Filtering
-    parser.add_argument('-f', '--filter', type=str,
-                        help='Filter data before plotting.')
+    parser.add_argument('--options', type=str,
+                        help='Options that apply to all files.')
+    parser.add_argument('--filter', type=str,
+                        help='Filter all files.')
     # Text
     # parser.add_argument('--annotate', nargs='+',
     #                     metavar='<text>:<x>,<y>[:<arrow>:<x>,<y>]',
@@ -92,42 +63,57 @@ def parse_args(args):
     args = parser.parse_args(args)
     if args.infile is not None:
         infiles = []
-        for arg in args.infile:
-            options = {"scalex": None, "scaley": None,
-                       "shiftx": None, "shifty": None}
-            tokens = re.split(':', arg)
-            if len(tokens) > 1:
-                # parser.error('Invalid format for infile ' + arg)
-                for token in tokens[1:]:
-                    option, value = re.split(',', token)
-                    options[option] = value
-            infiles.append([tokens[0], options])
+        for f in args.infiles:
+            infiles.append(chrom.Plot(f))
         args.infile = infiles
 
+    if args.options is not None:
+        args.options = chrom.Options(args.options)
     if args.filter is not None:
-        args.filter = filters.parse(args.filter)
-    if args.smooth is not None:
-        if len(args.smooth) == 0:
-            args.smooth = ['cubic', 300]
-        elif len(args.smooth) == 1:
-            args.smooth.append(300)
-        elif len(args.smooth) > 2:
-            parser.error('Specify 1 or 2 arguments.')
-    if args.annotate is not None:
-        annotations = []
-        for arg in args.annotate:
-            tokens = re.split(':|,', arg)
-            if len(tokens) % 3 != 0:
-                parser.error('Invalid annotation format for ' + arg)
-            annotations.append(tokens)
-        args.annotate = annotations
-    if args.labelpeaks is not None:
-            args.labelpeaks = filters.parse(args.labelpeaks)
-    if args.legend is not None:
-            args.legend = filters.parse(args.legend)
+        args.filter = chrom.Filter(args.filter)
+    # if args.smooth is not None:
+    #     if len(args.smooth) == 0:
+    #         args.smooth = ['cubic', 300]
+    #     elif len(args.smooth) == 1:
+    #         args.smooth.append(300)
+    #     elif len(args.smooth) > 2:
+    #         parser.error('Specify 1 or 2 arguments.')
+    # if args.annotate is not None:
+    #     annotations = []
+    #     for arg in args.annotate:
+    #         tokens = re.split(':|,', arg)
+    #         if len(tokens) % 3 != 0:
+    #             parser.error('Invalid annotation format for ' + arg)
+    #         annotations.append(tokens)
+    #     args.annotate = annotations
+    # if args.labelpeaks is not None:
+    #         args.labelpeaks = filters.parse(args.labelpeaks)
+    # if args.legend is not None:
+    #         args.legend = filters.parse(args.legend)
     # if args.shift is not None:
     #     args.shift = parse_filter(parser, args.shift)
     return vars(args)
 
-def main(args):
 
+def main(args):
+    args = parse_args(args)
+
+    return
+    # Create a list of files
+
+if __name__ == "__main__":
+    tfile = "/home/tom/Dropbox/Uni/Experimental/Results/20180129_eprep_apsvar/csv/005_2_006.txt"
+    toptions = ""
+    tfilter = "type=tic,event=3"
+
+    tstring = ":".join([tfile, toptions, tfilter])
+    print("tstring:", tstring)
+
+    plt = chrom.Plot(tstring)
+
+    print(plt.__dict__)
+
+    for trace in plt.get_traces():
+        print(trace.event)
+
+    main('test ' + tfile)
