@@ -105,10 +105,10 @@ def parse_args(args):
 def calculate_required_axes(infiles):
     nrows, ncols = 0, 0
     for f in infiles:
-        if f.axis[0] > nrows:
-            nrows = f.axis[0]
-        if f.axis[1] > ncols:
-            ncols = f.axis[1]
+        if f.options.axis[0] > nrows:
+            nrows = f.options.axis[0]
+        if f.options.axis[1] > ncols:
+            ncols = f.options.axis[1]
     return nrows + 1, ncols + 1
 
 
@@ -124,7 +124,6 @@ def main(args):
                              sharex=True, sharey=True,
                              subplot_kw=subplot_kw,
                              gridspec_kw={'wspace': 0, 'hspace': 0})
-    print(numpy.shape(axes))
 
     for f in args['infiles']:
         f.plot(axes)
@@ -135,9 +134,5 @@ def main(args):
 
 if __name__ == "__main__":
     tfile = "/home/tom/Dropbox/Uni/Experimental/Results/20180129_eprep_apsvar/csv/005_2_006.txt"
-    toptions = ""
-    tfilter = "mode=tic"
 
-    tstring = ":".join([tfile, toptions, tfilter])
-    print("tstring:", tstring)
-    main([tstring, tstring])
+    main([':'.join([tfile, 'mode=tic', 'colorby=event']), ':'.join([tfile, 'mode=mrm'])])

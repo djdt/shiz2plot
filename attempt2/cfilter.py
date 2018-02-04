@@ -1,8 +1,8 @@
 from cfile import File
-from coptions import Options
+from kvparser import KeyValParser
 
 
-class Filter(Options):
+class Filter(KeyValParser):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

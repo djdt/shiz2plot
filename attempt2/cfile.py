@@ -23,7 +23,7 @@ class Trace(object):
         self.TRACE_ID += 1
 
     def same_channel(self, other):
-        return self.precursor == other.precursor and self.mode == other.mode
+        return self.precursor > 0.0 and self.precursor == other.precursor
 
 
 class File(object):
