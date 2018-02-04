@@ -2,9 +2,9 @@ from kvparser import KeyValParser
 
 
 class Options(KeyValParser):
-    """Stores per-file options for plotting."""
-
     MAX_AXIS = [0, 0]
+
+    """Stores per-file options for plotting."""
 
     def _calc_axis(self):
         if self.axis is None:

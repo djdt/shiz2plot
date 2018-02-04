@@ -10,11 +10,11 @@ class KeyValParser(object):
         if len(args) > 1:
             raise TypeError(
                 "File: Takes 0 or 1 argument, {} given.".format(len(args)))
-        elif len(args) == 1:
+        elif len(args) == 1 and args[0] is not None:
             self.parse(args[0])
 
-        for key, val in kwargs.items():
-            setattr(self, key, val)
+        # Parsed values have priority
+        self.update(kwargs, overwrite=False)
 
     def _convert_value(self, value: str):
         try:
@@ -46,3 +46,11 @@ class KeyValParser(object):
 
             if overwrite or not hasattr(self, key):
                 setattr(self, key, vals)
+
+    def update(self, kwargs: dict, overwrite=False):
+        """Adds keys, values to the class.
+            kwargs -> (dict) key values to add.
+            overwrite -> (bool) overwrite existing."""
+        for key, val in kwargs.items():
+            if overwrite or not hasattr(self, key):
+                setattr(self, key, val)

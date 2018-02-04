@@ -7,14 +7,15 @@ from colors import get_color
 
 
 class Plot(object):
-    DEFAULT_OPTIONS = {"axis": None, "colorby": "channel",
-                       "scale": (1., 1.), "shift": (0., 0.)}
-    DEFAULT_KEYWORDS = {"linewidth": 0.75}
-
-    def __init__(self, string: str, axis=None,
-                 scale=(1., 1.), shift=(0., 0.),
-                 colorby='channel'):
+    def __init__(self, string: str, default_filter: Filter,
+                 default_options: Options,
+                 default_poltkws: Keywords):
         """Format for string is <filename>[:<filter>[:<options>[:<plotkw>]]]"""
+
+        self.filter = default_filter
+        self.options = default_options
+        self.plotkws = default_poltkws
+
         self.parse(string)
 
         self.handles = []
@@ -31,37 +32,41 @@ class Plot(object):
                     "[:<filter>[:<options>[:<plotkw]]]")
 
         self.file = File(tokens[0])
-        self.options = Options(**self.DEFAULT_OPTIONS)
-        self.keywords = Keywords(**self.DEFAULT_KEYWORDS)
 
         if len(tokens) > 1:
-            self.filter = Filter(tokens[1])
+            self.filter.parse(tokens[1])
         if len(tokens) > 2:
             self.options.parse(tokens[2])
         if len(tokens) > 3:
-            self.keywords.parse(tokens[3])
-
-    def get_traces(self):
-        return self.filter.filter(self.file)
+            self.plotkws.parse(tokens[3])
 
     def plot(self, axes):
         # Determine if color by trace is needed
         gen_color = True
-        if hasattr(self.keywords, 'color'):
+        if hasattr(self.plotkws, 'color'):
             gen_color = False
         elif hasattr(self.file, self.options.colorby):
             gen_color = False
             # Set color by colorby value
-            self.keywords.color = get_color(
+            self.plotkws.color = get_color(
                 getattr(self.file, self.options.colorby))
 
+        # Filter traces and plot them
         for trace in self.filter.filter(self.file):
-            # Create color for trace
+            # Create color for trace if needed
             if gen_color and hasattr(trace, self.options.colorby):
-                self.keywords.color = get_color(
+                self.plotkws.color = get_color(
                     getattr(trace, self.options.colorby))
 
-            handle, = axes[self.options.axis[0], self.options.axis[1]].plot(
-                trace.times, trace.responses,
-                **self.keywords.__dict__)
+            ax = axes[self.options.axis[0], self.options.axis[1]]
+
+            # Plot the traces and store handles
+            handle, = ax.plot(trace.times, trace.responses,
+                              **self.plotkws.__dict__)
             self.handles.append(handle)
+
+            # Add the names
+            ax.annotate(self.file.name,
+                        xy=(1, 1), xycoords='axes fraction',
+                        xytext=(-5, -5), textcoords='offset points',
+                        fontsize=10, ha='right', va='top')
