@@ -1,0 +1,41 @@
+Main:
+	*	Reorganise folders, e.g. chrom/file.py
+	*	Rename --scale to --figscale
+	* Add some error messages
+
+Chrom:
+	*	Remove default options, rely on hasattr() returning false
+	* Implement functions in Options
+	* ?? Rework options into a less dynamic class ??
+
+
+Functions:
+
+	# Options
+	def get_color(self, trace: TraceData, colors):
+		color = "000000"
+		if hasattr(trace, self.colorby):
+			color = colors[getattr(trace, self.colorby) % len(colors)]
+		else:
+		 print("Options.get_color: trace {} has no attr {}"
+				   "returning black.".format(trace.traceid, self.colorby))
+		return color
+
+	# Options
+	def shift_and_scale(self, trace: TraceData):
+		if self.scale == (1., 1.) and self.shift == (0., 0.):
+			return trace
+
+		# Create a new trace object and copy data into it
+		shifted = TraceData(trace.mode, trace.ion_mode,
+		                    trace.event, trace.channel,
+												trace.precursor, trace.product)
+
+		# Apply shift and scale operations
+		shifted.times = np.add(trace.times, self.shift[0])
+		np.multiply(shifted.times, self.scale[0], out=shifted.times)
+
+		shifted.responses = np.add(trace.responses, self.shift[1])
+		np.multiply(shifted.responses, self.scale[1], out=shifted.responses)
+
+		return shifted
