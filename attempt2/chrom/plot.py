@@ -51,15 +51,27 @@ class Plot(object):
     def get_color(self, trace: Trace, colors=base16_colors):
         if hasattr(self.file, self.options.colorby):
             # Set color by colorby value
-            return base16_colors[getattr(self.file, self.options.colorby)
-                                 % len(base16_colors)]
+            return colors[
+                getattr(self.file, self.options.colorby) % len(colors)]
         elif hasattr(trace, self.options.colorby):
-            return base16_colors[getattr(trace, self.options.colorby)
-                                 % len(base16_colors)]
+            return colors[
+                getattr(trace, self.options.colorby) % len(colors)]
         else:
             print("Options.gen_color: unable to find attr {}".format(
                 self.options.colorby))
-            return "000000"
+            return "#000000"
+
+    def label_peaks(self, ax, labels, by='event'):
+        for i, label in enumerate(labels):
+            xy = (0, 0)
+            for trace in self.filter.filter(self.file):
+                if getattr(trace, by) == i:
+                    peak = trace.detect_peak()
+                    if peak[1] > xy[1]:
+                        xy = peak
+            ax.annotate(label, xy=xy, xytext=(0, 5),
+                        xycoords='data', textcoords='offset points',
+                        va='bottom', ha='center')
 
     def shift_and_scale(self, trace: Trace):
             if not hasattr(self, 'scale') and not hasattr(self, 'shift'):
@@ -80,13 +92,12 @@ class Plot(object):
 
     def plot(self, axes):
         plotkws = self.plotkws.__dict__.copy()
+        ax = self.assign_axis(axes)
         # Filter traces and plot them
-        for trace in self.filter.filter(self.file):
+        for i, trace in enumerate(self.filter.filter(self.file)):
             # Create color for trace if needed
             if not hasattr(self.plotkws, 'color'):
                 plotkws['color'] = self.get_color(trace)
-
-            ax = self.assign_axis(axes)
 
             # Plot the traces and store handles
             handle, = ax.plot(*self.shift_and_scale(trace),
@@ -98,3 +109,7 @@ class Plot(object):
                         xy=(1, 1), xycoords='axes fraction',
                         xytext=(-5, -5), textcoords='offset points',
                         fontsize=10, ha='right', va='top')
+
+        # Label peaks
+        if hasattr(self.options, 'peaklabels'):
+            self.label_peaks(ax, self.options.peaklabels)

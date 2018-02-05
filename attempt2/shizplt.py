@@ -14,6 +14,13 @@ DEFAULT_FILTER = {}
 DEFAULT_OPTIONS = {"colorby": "channel"}
 DEFAULT_PLOTKWS = {"linewidth": 0.75}
 
+AVAILABLE_OPTIONS = {"axis": "(int, int) position of the plot.",
+                     "colorby": "(string) attribute used to determine color.",
+                     "scale": "(float, float) scale the plot data.",
+                     "shift": "(float, float) shift the plot data.",
+                     "peaklabels": "(list) labels for peaks, from left."}
+
+
 
 def parse_args(args):
     parser = argparse.ArgumentParser(
@@ -146,5 +153,5 @@ if __name__ == "__main__":
              "20180129_eprep_apsvar/csv/005_2_006.txt")
 
     main([':'.join([tfile, 'mode=tic', 'colorby=event']),
-          ':'.join([tfile, 'mode=mrm', '', 'color=#121212']),
+          ':'.join([tfile, 'mode=mrm', 'peaklabels=[cats,bats,c,d,e,f]', 'color=#121212']),
           '--plotkws', 'linewidth=2'])

@@ -25,6 +25,12 @@ class Trace(object):
     def same_channel(self, other):
         return self.precursor > 0.0 and self.precursor == other.precursor
 
+    def detect_peak(self):
+        gradient = numpy.gradient(self.responses)
+        peak = int((numpy.argmax(gradient) + numpy.argmin(gradient)) / 2)
+
+        return self.times[peak], self.responses[peak]
+
 
 class File(object):
     FILE_ID = 0
