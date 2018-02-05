@@ -1,4 +1,4 @@
-from kvparser import KeyValParser
+from chrom.kvparser import KeyValParser
 
 
 class Keywords(KeyValParser):

@@ -3,15 +3,15 @@
 import argparse
 import matplotlib.pyplot as plt
 
-import cplot
-from cfilter import Filter
-from coptions import Options
-from ckeywords import Keywords
+from chrom.plot import Plot
+from chrom.filter import Filter
+from chrom.options import Options
+from chrom.keywords import Keywords
 
 import latex
 
 DEFAULT_FILTER = {}
-DEFAULT_OPTIONS = {"axis": None, "colorby": "channel",
+DEFAULT_OPTIONS = {"colorby": "channel",
                    "scale": (1., 1.), "shift": (0., 0.)}
 DEFAULT_PLOTKWS = {"linewidth": 0.75}
 
@@ -48,8 +48,8 @@ def parse_args(args):
     # parser.add_argument('--labelpeaks', nargs='+',
     #                     metavar='<label>[:<filter>]',
     #                     help='Label largest peak in filter.')
-    # parser.add_argument('--legend', nargs='*', metavar='<text>[:<filer>]',
-    #                     help='Add a legend with optional names.')
+    parser.add_argument('--legend', nargs='*', metavar='<text>[:axis]',
+                        help='Add a legend with optional names.')
     # Processing
     # parser.add_argument('--detectpeaks', nargs='+',
     #                     metavar='<filter>',
@@ -65,9 +65,9 @@ def parse_args(args):
         infiles = []
         for f in args.infiles:
             infiles.append(
-                cplot.Plot(f, Filter(args.filter),
-                           Options(args.options, **DEFAULT_OPTIONS),
-                           Keywords(args.plotkws, **DEFAULT_PLOTKWS)))
+                Plot(f, Filter(args.filter),
+                     Options(args.options, **DEFAULT_OPTIONS),
+                     Keywords(args.plotkws, **DEFAULT_PLOTKWS)))
         args.infiles = infiles
 
     # for f in args.infiles:
@@ -132,6 +132,7 @@ def main(args):
                              gridspec_kw={'wspace': 0, 'hspace': 0})
 
     for f in args['infiles']:
+        print(f.plotkws.__dict__)
         f.plot(axes)
 
     plt.show()
@@ -143,4 +144,5 @@ if __name__ == "__main__":
              "20180129_eprep_apsvar/csv/005_2_006.txt")
 
     main([':'.join([tfile, 'mode=tic', 'colorby=event']),
-          ':'.join([tfile, 'mode=mrm']),])
+          ':'.join([tfile, 'mode=mrm', 'axis=(0,1)', 'linewidth=4']),
+          '--plotkws', 'linewidth=2'])

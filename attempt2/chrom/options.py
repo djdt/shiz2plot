@@ -1,4 +1,4 @@
-from kvparser import KeyValParser
+from chrom.kvparser import KeyValParser
 
 
 class Options(KeyValParser):
@@ -7,7 +7,7 @@ class Options(KeyValParser):
     """Stores per-file options for plotting."""
 
     def _calc_axis(self):
-        if self.axis is None:
+        if not hasattr(self, 'axis'):
             self.axis = self.MAX_AXIS[:]
             self.MAX_AXIS[0] += 1
         else:

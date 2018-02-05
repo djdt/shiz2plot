@@ -1,7 +1,7 @@
-from cfile import File
-from coptions import Options
-from cfilter import Filter
-from ckeywords import Keywords
+from chrom.file import File
+from chrom.options import Options
+from chrom.filter import Filter
+from chrom.keywords import Keywords
 
 from colors import get_color
 
