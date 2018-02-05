@@ -11,8 +11,7 @@ from chrom.keywords import Keywords
 import latex
 
 DEFAULT_FILTER = {}
-DEFAULT_OPTIONS = {"colorby": "channel",
-                   "scale": (1., 1.), "shift": (0., 0.)}
+DEFAULT_OPTIONS = {"colorby": "channel"}
 DEFAULT_PLOTKWS = {"linewidth": 0.75}
 
 
@@ -104,10 +103,14 @@ def parse_args(args):
 def calculate_required_axes(infiles):
     nrows, ncols = 0, 0
     for f in infiles:
-        if f.options.axis[0] > nrows:
-            nrows = f.options.axis[0]
-        if f.options.axis[1] > ncols:
-            ncols = f.options.axis[1]
+        if hasattr(f.options, 'axis'):
+            if f.options.axis[0] > nrows:
+                nrows = f.options.axis[0]
+            if f.options.axis[1] > ncols:
+                ncols = f.options.axis[1]
+        else:
+            if f.file.fileid > nrows:
+                nrows = f.file.fileid
     return nrows + 1, ncols + 1
 
 
@@ -132,7 +135,6 @@ def main(args):
                              gridspec_kw={'wspace': 0, 'hspace': 0})
 
     for f in args['infiles']:
-        print(f.plotkws.__dict__)
         f.plot(axes)
 
     plt.show()
@@ -144,5 +146,5 @@ if __name__ == "__main__":
              "20180129_eprep_apsvar/csv/005_2_006.txt")
 
     main([':'.join([tfile, 'mode=tic', 'colorby=event']),
-          ':'.join([tfile, 'mode=mrm', 'axis=(0,1)', 'linewidth=4']),
+          ':'.join([tfile, 'mode=mrm', '', 'color=#121212']),
           '--plotkws', 'linewidth=2'])

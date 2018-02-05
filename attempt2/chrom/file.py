@@ -19,8 +19,8 @@ class Trace(object):
         self.responses = responses
 
         # Gen unique ID
-        self.traceid = self.TRACE_ID
-        self.TRACE_ID += 1
+        self.traceid = Trace.TRACE_ID
+        Trace.TRACE_ID += 1
 
     def same_channel(self, other):
         return self.precursor > 0.0 and self.precursor == other.precursor
@@ -34,8 +34,8 @@ class File(object):
         self.parse(path)
 
         # Gen unique ID
-        self.fileid = self.FILE_ID
-        self.FILE_ID += 1
+        self.fileid = File.FILE_ID
+        File.FILE_ID += 1
 
     def parse(self, path: str):
         if self.format != 'shimadzu':

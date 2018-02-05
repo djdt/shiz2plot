@@ -1,9 +1,11 @@
-from chrom.file import File
+import numpy
+
+from chrom.file import File, Trace
 from chrom.options import Options
 from chrom.filter import Filter
 from chrom.keywords import Keywords
 
-from colors import get_color
+from colors import base16_colors
 
 
 class Plot(object):
@@ -40,29 +42,55 @@ class Plot(object):
         if len(tokens) > 3:
             self.plotkws.parse(tokens[3])
 
-    def plot(self, axes):
-        # Determine if color by trace is needed
-        gen_color = True
-        if hasattr(self.plotkws, 'color'):
-            gen_color = False
-        elif hasattr(self.file, self.options.colorby):
-            gen_color = False
-            # Set color by colorby value
-            self.plotkws.color = get_color(
-                getattr(self.file, self.options.colorby))
+    def assign_axis(self, axes):
+        if hasattr(self.options, 'axis'):
+            return axes[self.options.axis[0], self.options.axis[1]]
+        else:
+            return axes[self.file.fileid, 0]
 
+    def get_color(self, trace: Trace, colors=base16_colors):
+        if hasattr(self.file, self.options.colorby):
+            # Set color by colorby value
+            return base16_colors[getattr(self.file, self.options.colorby)
+                                 % len(base16_colors)]
+        elif hasattr(trace, self.options.colorby):
+            return base16_colors[getattr(trace, self.options.colorby)
+                                 % len(base16_colors)]
+        else:
+            print("Options.gen_color: unable to find attr {}".format(
+                self.options.colorby))
+            return "000000"
+
+    def shift_and_scale(self, trace: Trace):
+            if not hasattr(self, 'scale') and not hasattr(self, 'shift'):
+                return trace.times, trace.responses
+
+            # Create a new trace object and copy data into it
+            times, responses = trace.times[:], trace.responses[:]
+            # Apply shift and scale operations
+            if hasattr(self, 'shift'):
+                numpy.add(times, self.shift[0], out=times)
+                numpy.add(responses, self.shift[1], out=responses)
+            if hasattr(self, 'scale'):
+                numpy.multiply(times, self.scale[0],
+                               out=times)
+                numpy.multiply(responses, self.scale[1],
+                               out=responses)
+            return times, responses
+
+    def plot(self, axes):
+        plotkws = self.plotkws.__dict__.copy()
         # Filter traces and plot them
         for trace in self.filter.filter(self.file):
             # Create color for trace if needed
-            if gen_color and hasattr(trace, self.options.colorby):
-                self.plotkws.color = get_color(
-                    getattr(trace, self.options.colorby))
+            if not hasattr(self.plotkws, 'color'):
+                plotkws['color'] = self.get_color(trace)
 
-            ax = axes[self.options.axis[0], self.options.axis[1]]
+            ax = self.assign_axis(axes)
 
             # Plot the traces and store handles
-            handle, = ax.plot(trace.times, trace.responses,
-                              **self.plotkws.__dict__)
+            handle, = ax.plot(*self.shift_and_scale(trace),
+                              **plotkws)
             self.handles.append(handle)
 
             # Add the names
