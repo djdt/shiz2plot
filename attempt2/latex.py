@@ -1,12 +1,14 @@
 import numpy
 import matplotlib.pyplot as plt
 
-# Defines requires for latex
-plt.rc('text', usetex=True)
-plt.rc('pgf', rcfonts=False)
-plt.rcParams['text.latex.preamble'] = ['\\usepackage{siunitx}']
-plt.rcParams['pgf.preamble'] = ['\\usepackage{siunitx}',
-                                '\\sisetup{detect-all, math-rm=\\mathsf}']
+
+def plot_options():
+    # Defines requires for latex
+    plt.rc('text', usetex=True)
+    plt.rc('pgf', rcfonts=False)
+    plt.rcParams['text.latex.preamble'] = ['\\usepackage{siunitx}']
+    plt.rcParams['pgf.preamble'] = ['\\usepackage{siunitx}',
+                                    '\\sisetup{detect-all, math-rm=\\mathsf}']
 
 
 def size(wscale, hscale, textwidth=426.79135):
