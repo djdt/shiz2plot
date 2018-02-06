@@ -9,7 +9,7 @@ from chrom.filter import Filter
 from chrom.options import Options
 from chrom.keywords import Keywords
 
-import latex
+import util.latex as latex
 
 DEFAULT_FILTER = {}
 DEFAULT_OPTIONS = {"colorby": "channel"}
