@@ -26,6 +26,9 @@ class KeyValParser(object):
             pass
         return value
 
+    def _key_is_valid(self, key):
+        return True
+
     def parse(self, string: str, overwrite=True):
         """Parse a string and add values.
             string -> (string) comma separated list of <key>=<val>.
@@ -38,6 +41,9 @@ class KeyValParser(object):
 
         for token in tokens:
             key, vals = token.split('=')
+            if not self._key_is_valid(key):
+                raise ValueError("{}: Invalid key \'{}\'!".format(
+                                 self.__class__.__name__, key))
 
             vals = vals.strip('[]()').split(',')
             vals = [self._convert_value(x) for x in vals]
@@ -52,5 +58,8 @@ class KeyValParser(object):
             kwargs -> (dict) key values to add.
             overwrite -> (bool) overwrite existing."""
         for key, val in kwargs.items():
+            if not self._key_is_valid(key):
+                raise ValueError("{}: Invalid key \'{}\'!".format(
+                                 self.__class.__name__, key))
             if overwrite or not hasattr(self, key):
                 setattr(self, key, val)
