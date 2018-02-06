@@ -1,4 +1,5 @@
 import re
+import os.path
 import numpy
 
 
@@ -45,8 +46,10 @@ class File(object):
 
     def parse(self, path: str):
         if self.format != 'shimadzu':
-            raise TypeError('Uknown format ' + self.format)
-        self.path = path
+            raise TypeError('Uknown format {}!'.format(self.format))
+        if not os.path.exists(path):
+            raise Exception('File {} does not exist!'.format(path))
+        self.path = os.path.abspath(path)
         self.traces = []
 
         with open(self.path) as fp:

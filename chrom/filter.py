@@ -7,14 +7,18 @@ class Filter(KeyValParser):
         super().__init__(*args, **kwargs)
 
     def filter(self, file: File):
+        key_found = False
         filtered = []
         for key in self.__dict__:
-            if hasattr(file, key):
-                if getattr(file, key) not in getattr(self, key):
-                    break
+            if hasattr(file, key):  # Check key in file
+                if getattr(file, key) in getattr(self, key):
+                    return file.traces
+                else:
+                    return []
             else:
-                for trace in file.traces:
+                for trace in file.traces:  # Check key in traces
                     if hasattr(trace, key) and \
                        getattr(trace, key) in getattr(self, key):
+                        key_found = True
                         filtered.append(trace)
-        return filtered
+        return filtered if key_found else file.traces

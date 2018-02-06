@@ -29,9 +29,7 @@ class Plot(object):
 
         tokens = string.split(':')
         if len(tokens) > 4:
-            raise TypeError(
-                    "Plot.parse: Format is <filename>"
-                    "[:<filter>[:<options>[:<plotkw]]]")
+            raise TypeError("Plot.parse: To many tokens recieved!")
 
         self.file = File(tokens[0])
 
@@ -104,11 +102,11 @@ class Plot(object):
                               **plotkws)
             self.handles.append(handle)
 
-            # Add the names
-            ax.annotate(self.file.name,
-                        xy=(1, 1), xycoords='axes fraction',
-                        xytext=(-5, -5), textcoords='offset points',
-                        fontsize=10, ha='right', va='top')
+        # Add the names
+        ax.annotate(self.file.name,
+                    xy=(1, 1), xycoords='axes fraction',
+                    xytext=(-5, -5), textcoords='offset points',
+                    fontsize=10, ha='right', va='top')
 
         # Label peaks
         if hasattr(self.options, 'peaklabels'):
