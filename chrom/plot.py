@@ -5,7 +5,7 @@ from chrom.options import Options
 from chrom.filter import Filter
 from chrom.keywords import Keywords
 
-from colors import base16_colors
+from util.colors import base16_colors
 
 
 class Plot(object):
