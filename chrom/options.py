@@ -12,9 +12,9 @@ class Options(KeyValParser):
         "smooth": "(int) smooth data with \'int\' order."
     }
     """Stores per-file options for plotting."""
-    def _key_is_valid(self, key):
-        return key in Options.VALID_KEYS.keys()
-
     def __init__(self, *args, **kwargs):
         """Takes one optional argument, a string passed to .parse."""
         super().__init__(*args, **kwargs)
+
+    def _key_is_valid(self, key):
+        return key in Options.VALID_KEYS.keys()
