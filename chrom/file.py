@@ -6,6 +6,11 @@ import numpy
 class Trace(object):
     TRACE_ID = 0
 
+    def _gen_uid(self):
+        id = Trace.TRACE_ID
+        Trace.TRACE_ID += 1
+        return id
+
     def __init__(self, mode='tic', ion_mode='+',
                  event=0, channel=0, precursor=0.0, product=0.0,
                  times=numpy.zeros(0, dtype=float),
@@ -20,8 +25,7 @@ class Trace(object):
         self.responses = responses
 
         # Gen unique ID
-        self.traceid = Trace.TRACE_ID
-        Trace.TRACE_ID += 1
+        self.traceid = self._gen_uid()
 
     def same_channel(self, other):
         return self.precursor > 0.0 and self.precursor == other.precursor
@@ -36,20 +40,27 @@ class Trace(object):
 class File(object):
     FILE_ID = 0
 
+    def _gen_uid(self):
+        id = File.FILE_ID
+        File.FILE_ID += 1
+        return id
+
     def __init__(self, path: str, format='shimadzu'):
         self.format = format
-        self.parse(path)
+        if not os.path.exists(path):
+            raise AttributeError('File {} does not exist!'.format(path))
+        self.path = os.path.abspath(path)
+        self.name = ""
+        self.id = -1
+        self.fileid = self._gen_uid()
 
-        # Gen unique ID
-        self.fileid = File.FILE_ID
-        File.FILE_ID += 1
+        self.parse(path)
 
     def parse(self, path: str):
         if self.format != 'shimadzu':
             raise TypeError('Uknown format {}!'.format(self.format))
-        if not os.path.exists(path):
-            raise Exception('File {} does not exist!'.format(path))
-        self.path = os.path.abspath(path)
+        self.name = ""
+        self.id = -1
         self.traces = []
 
         with open(self.path) as fp:
