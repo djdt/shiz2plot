@@ -3,8 +3,26 @@ from chrom.kvparser import KeyValParser
 
 
 class Filter(KeyValParser):
+    VALID_KEYS = {
+        "mode": "(str) detection mode. \'tic\' or \'mrm\'.",
+        "ion_mode": "(str) ionisation mode. \'+\' or \'-\'.",
+        "event": "(int) event id.",
+        "channel": "(int) channel id.",
+        "precursor": "(float) precursor ion m/z.",
+        "product": "(float) product ion m/z.",
+        "traceid": "(int) unique trace id.",
+
+        "path": "(str) absolute path to file.",
+        "name": "(name) the name of the sample.",
+        "id": "(int) the id of the sample.",
+        "fileid": "(int) unique file id.",
+    }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def _key_is_valid(self, key):
+        return key in Filter.VALID_KEYS.keys()
 
     def filter(self, file: File):
         key_found = False
