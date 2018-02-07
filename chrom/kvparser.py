@@ -42,8 +42,8 @@ class KeyValParser(object):
         for token in tokens:
             key, vals = token.split('=')
             if not self._key_is_valid(key):
-                raise ValueError("{}: Invalid key \'{}\'!".format(
-                                 self.__class__.__name__, key))
+                raise KeyError("{}: Invalid key \'{}\'!".format(
+                               self.__class__.__name__, key))
 
             vals = vals.strip('[]()').split(',')
             vals = [self._convert_value(x) for x in vals]
@@ -59,7 +59,7 @@ class KeyValParser(object):
             overwrite -> (bool) overwrite existing."""
         for key, val in kwargs.items():
             if not self._key_is_valid(key):
-                raise ValueError("{}: Invalid key \'{}\'!".format(
-                                 self.__class.__name__, key))
+                raise KeyError("{}: Invalid key \'{}\'!".format(
+                               self.__class.__name__, key))
             if overwrite or not hasattr(self, key):
                 setattr(self, key, val)

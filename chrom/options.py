@@ -4,10 +4,10 @@ from chrom.kvparser import KeyValParser
 class Options(KeyValParser):
     VALID_KEYS = {
         "axis": "(int, int) position of the plot.",
-        "colorby": "(string) attribute used to determine color.",
+        "colorby": "(str) attribute used to determine color.",
         "scale": "(float, float) scale the plot data.",
         "shift": "(float, float) shift the plot data.",
-        "name": "(string) name of the plot.",
+        "name": "(str) name of the plot.",
         "peaklabels": "(list) labels for peaks, from left.",
         "smooth": "(int) smooth data with \'int\' order."
     }
