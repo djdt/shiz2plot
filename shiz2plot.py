@@ -18,11 +18,33 @@ DEFAULT_OPTIONS = {"colorby": "channel"}
 DEFAULT_PLOTKWS = {"linewidth": 0.75}
 
 
+class ListKeysAction(argparse.Action):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if values == 'filter':
+            defaults = DEFAULT_FILTER
+            valid = Filter.VALID_KEYS
+        elif values == 'options':
+            defaults = DEFAULT_OPTIONS
+            valid = Options.VALID_KEYS
+        elif values == 'plotkws':
+            defaults = DEFAULT_PLOTKWS
+            valid = {}  # Needs to be implemented
+
+        print("default key/values:")
+        print("\t" + "\n\t".join("{} -> {}".format(
+              k, v) for k, v in defaults.items()))
+        print("valid keys:")
+        print("\t" + "\n\t".join("{} -> {}".format(
+              k, v) for k, v in valid.items()))
+
+        parser.exit()
+
+
 def parse_args(args):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='Plots Shimadzu chromatography data.',
-        add_help=False)
+        description='Plots Shimadzu chromatography data.')
     # Input / output
     parser.add_argument('infiles', nargs='+',
                         metavar='<file>[:<filter>[:<options>[:<plotkws>]]]',
@@ -54,9 +76,10 @@ def parse_args(args):
                         help='Y-axis label.')
 
     # Help
-    parser.add_argument('-h', '--help', type='str', nargs='*',
-                        choices=
-                        help='Print help information.')
+    parser.add_argument('--listkeys',
+                        choices=['filter', 'options', 'plotkws'],
+                        action=ListKeysAction,
+                        help='List default and available keys.')
 
     # parser.add_argument('--annotate', nargs='+',
     #                     metavar='<text>:<x>,<y>[:<arrow>:<x>,<y>]',
@@ -65,6 +88,9 @@ def parse_args(args):
     #                     help='Add a legend with optional names.')
 
     args = parser.parse_args(args)
+
+    if args.listkeys is not None:
+        return
 
     # Update the default options
 
