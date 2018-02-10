@@ -103,7 +103,11 @@ class Plot(object):
             self.handles.append(handle)
 
         # Add the names
-        ax.annotate(self.file.name,
+        if hasattr(self.options, 'name'):
+            name = self.options.name
+        else:
+            name = self.file.name
+        ax.annotate(name,
                     xy=(1, 1), xycoords='axes fraction',
                     xytext=(-5, -5), textcoords='offset points',
                     fontsize=10, ha='right', va='top')
@@ -111,3 +115,10 @@ class Plot(object):
         # Label peaks
         if hasattr(self.options, 'peaklabels'):
             self.label_peaks(ax, self.options.peaklabels)
+
+        # Legend
+        # if hasattr(self.options, 'legend'):
+        #     labels = self.options.legend
+        #     ax.legend(handles=self.handles,
+        #               labels=[labels] if isinstance(labels, str) else labels,
+        #               framealpha=1.0, fancybox=False)

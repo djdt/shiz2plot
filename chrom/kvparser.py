@@ -36,11 +36,12 @@ class KeyValParser(object):
         if len(string) == 0:
             return
 
-        string = string.strip().lower()
+        string = string.strip()
         tokens = re.split('\,(?=\w+\=)', string)
 
         for token in tokens:
             key, vals = token.split('=')
+            key = key.lower()
             if not self._key_is_valid(key):
                 raise KeyError(key, self.__class__)
 

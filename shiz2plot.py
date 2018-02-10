@@ -75,16 +75,16 @@ def parse_args(args):
     parser.add_argument('--ylabel', type=str, default='Response',
                         help='Y-axis label.')
 
+    parser.add_argument('--annotate', nargs='+',
+                        metavar='<text>:<key>=<value>[,...][:<axis>]',
+                        help=('Add an annotation to the selected axis, '
+                              'omit \'xytext\' if arrow is not needed'))
+
     # Help
     parser.add_argument('--listkeys',
                         choices=['filter', 'options', 'plotkws'],
                         action=ListKeysAction,
                         help='List default and available keys.')
-
-    parser.add_argument('--annotate', nargs='+',
-                        metavar='<text>:<key>=<value>[,...][:<axis>]',
-                        help=('Add an annotation to the selected axis, '
-                              'omit \'xytext\' if arrow is not needed'))
     # parser.add_argument('--legend', nargs='*', metavar='<text>[:axis]',
     #                     help='Add a legend with optional names.')
 

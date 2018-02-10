@@ -7,6 +7,7 @@ class Options(KeyValParser):
         "colorby": "(str) attribute used to determine color.",
         "scale": "(float, float) scale the plot data.",
         "shift": "(float, float) shift the plot data.",
+        "legend": "legend entries for the plot.",
         "name": "(str) name of the plot.",
         "peaklabels": "(list) labels for peaks, from left.",
         "smooth": "(int) smooth data with \'int\' order."
