@@ -27,7 +27,7 @@ class Filter(KeyValParser):
     def filter(self, file: File):
         key_found = False
         filtered = []
-        for key in self.__dict__:
+        for key in self.get():
             if hasattr(file, key):  # Check key in file
                 if getattr(file, key) in getattr(self, key):
                     return file.traces

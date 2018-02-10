@@ -61,3 +61,6 @@ class KeyValParser(object):
                 raise KeyError(key, self.__class__)
             if overwrite or not hasattr(self, key):
                 setattr(self, key, val)
+
+    def get(self):
+        return self.__dict__
