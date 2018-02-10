@@ -85,9 +85,6 @@ def parse_args(args):
                         metavar='<text>:<key>=<value>[,...][:<axis>]',
                         help=('Add an annotation to the selected axis, '
                               'omit \'xytext\' if arrow is not needed'))
-    parser.add_argument('--text', nargs='+',
-                        metavar='<text>:<axis>[:<key>=<value>[,...]]',
-                        help='Add text to the selected axis.')
     # parser.add_argument('--legend', nargs='*', metavar='<text>[:axis]',
     #                     help='Add a legend with optional names.')
 
