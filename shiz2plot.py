@@ -81,9 +81,13 @@ def parse_args(args):
                         action=ListKeysAction,
                         help='List default and available keys.')
 
-    # parser.add_argument('--annotate', nargs='+',
-    #                     metavar='<text>:<x>,<y>[:<arrow>:<x>,<y>]',
-    #                     help='Add text to cromatogram, optional marker.')
+    parser.add_argument('--annotate', nargs='+',
+                        metavar='<text>:<key>=<value>[,...][:<axis>]',
+                        help=('Add an annotation to the selected axis, '
+                              'omit \'xytext\' if arrow is not needed'))
+    parser.add_argument('--text', nargs='+',
+                        metavar='<text>:<axis>[:<key>=<value>[,...]]',
+                        help='Add text to the selected axis.')
     # parser.add_argument('--legend', nargs='*', metavar='<text>[:axis]',
     #                     help='Add a legend with optional names.')
 
@@ -108,6 +112,30 @@ def parse_args(args):
         args.infiles = infiles
 
     return vars(args)
+
+
+def add_annotation(axes, string: str, annotation=True):
+    default_kwargs = {'xycoords': 'axes fraction',
+                      'textcoords': 'axes fraction',
+                      'va': 'bottom', 'ha': 'center',
+                      'arrowprops': dict(arrowstyle='<-', lw=0.75)}
+    ax = None
+
+    tokens = string.split(':')
+    text = tokens[0]
+    kwargs = Keywords(tokens[1], **default_kwargs)
+    if len(tokens) > 2:
+        ax = tokens[2].strip('[]()').split(',')
+        ax = [int(x) for x in ax]
+
+    if not hasattr(kwargs, 'xytext'):
+        kwargs.xytext = kwargs.xy
+        kwargs.arrowprops = None
+
+    if ax is not None:
+        axes[ax[0], ax[1]].annotate(text, **kwargs.get())
+    else:
+        plt.annotate(text, **kwargs.get())
 
 
 def calculate_required_axes(infiles):
@@ -158,6 +186,11 @@ def main(args):
         ax.ticklabel_format(axis='y', style='sci', scilimits=(-1, 3))
     for ax in axes.flatten()[1:]:
         ax.yaxis.offsetText.set_visible(False)
+
+    # Add annotations
+    if args['annotate'] is not None:
+        for an in args['annotate']:
+            add_annotation(axes, an)
 
     # Hack for pgf not recognising none as labelcolor
     plt.xlabel(args['xlabel'])
