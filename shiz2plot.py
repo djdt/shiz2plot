@@ -5,6 +5,7 @@ import sys
 
 import matplotlib.pyplot as plt
 import matplotlib.transforms as mtransforms
+import matplotlib.lines as mlines
 
 from chrom.plot import Plot
 from chrom.filter import Filter
@@ -12,6 +13,7 @@ from chrom.options import Options
 from chrom.keywords import Keywords
 
 import util.latex as latex
+from util.colors import base16_colors
 
 DEFAULT_FILTER = {}
 DEFAULT_OPTIONS = {"colorby": "channel"}
@@ -49,7 +51,7 @@ def parse_args(args):
     parser.add_argument('infiles', nargs='+',
                         metavar='<file>[:<filter>[:<options>[:<plotkws>]]]',
                         help='Input files and options.')
-    parser.add_argument('-o', '--outfile',
+    parser.add_argument('-o', '--output',
                         help='Output filename and format.')
     parser.add_argument('-S', '--noshow', action='store_true',
                         help='Don\'t show the image.')
@@ -85,8 +87,8 @@ def parse_args(args):
                         choices=['filter', 'options', 'plotkws'],
                         action=ListKeysAction,
                         help='List default and available keys.')
-    # parser.add_argument('--legend', nargs='*', metavar='<text>[:axis]',
-    #                     help='Add a legend with optional names.')
+    parser.add_argument('--legend', nargs='*', type=str,
+                        help='Text for legends.')
 
     args = parser.parse_args(args)
 
@@ -189,9 +191,19 @@ def main(args):
         for an in args['annotate']:
             add_annotation(axes, an)
 
+    # Add legends
+    if args['legend'] is not None:
+        lines = []
+        for i, label in enumerate(args['legend']):
+            line = mlines.Line2D([], [],
+                                 color=base16_colors[i % len(base16_colors)],
+                                 linewidth=0.75, label=label)
+            lines.append(line)
+        plt.legend(handles=lines, framealpha=1.0, fancybox=False)
+
     # Hack for pgf not recognising none as labelcolor
     plt.xlabel(args['xlabel'])
-    if args['outfile'] and args['outfile'].endswith('pgf'):
+    if args['output'] and args['output'].endswith('pgf'):
         set_shared_ylabel(args['ylabel'], axes, fig)
     else:
         fig.add_subplot(111, frameon=False)
@@ -203,8 +215,8 @@ def main(args):
     plt.tight_layout()
 
     # Save and/or show the output
-    if args['outfile']:
-        plt.savefig(args['outfile'])
+    if args['output']:
+        plt.savefig(args['output'])
     if not args['noshow']:
         plt.show()
     return
