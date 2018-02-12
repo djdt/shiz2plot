@@ -45,7 +45,6 @@ class ListKeysAction(argparse.Action):
 
 def parse_args(args):
     parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description='Plots Shimadzu chromatography data.',
         epilog='For filters, options, plotkws see listkeys.')
     # Input / output
@@ -57,47 +56,39 @@ def parse_args(args):
     parser.add_argument('-S', '--noshow', action='store_true',
                         help='Don\'t show the image.')
     # Options
-    parser.add_argument('--scale', type=float, nargs=2,
-                        default=(0.9, 0.9),
-                        help='The X and Y scale of the image.')
+    parser.add_argument('--scale', nargs=2, type=float,
+                        default=(0.9, 0.9), metavar=('X', 'Y'),
+                        help='The figure scale.')
     parser.add_argument('-T', '--notex', action='store_true',
                         help='Don\'t use latex parameters.')
 
-    parser.add_argument('--filter', type=str,
-                        metavar='<key>=<value>[,...]',
+    parser.add_argument('--filter', metavar='<key>=<value>,...',
                         help='Filter all files.')
-    parser.add_argument('--options', type=str,
-                        metavar='<key>=<value>[,...]',
+    parser.add_argument('--options', metavar='<key>=<value>,...',
                         help='Options that apply to all files.')
-    parser.add_argument('--plotkws', type=str,
-                        metavar='<key>=<value>[,...]',
+    parser.add_argument('--plotkws', metavar='<key>=<value>,...',
                         help='Key and values to pass to plots.')
     # Text
-    parser.add_argument('--xlabel', type=str, default='Time (\\si{\\minute})',
+    parser.add_argument('--xlabel', default='Time (\\si{\\minute})',
                         help='X-axis label.')
-    parser.add_argument('--ylabel', type=str, default='Response',
+    parser.add_argument('--ylabel', default='Response',
                         help='Y-axis label.')
 
     parser.add_argument('--annotate', nargs='+',
-                        metavar='<text>:<key>=<value>[,...][:<axis>]',
-                        help=('Add an annotation to the selected axis, '
-                              'omit \'xytext\' if arrow is not needed'))
+                        metavar='<text>:<key>=<value>,...:axis',
+                        help=('Add an annotation to the selected axis. '
+                              'Omit \'xytext\' if arrow is not needed.'))
+    parser.add_argument('--legend', nargs='+',
+                        help='Text for legends.')
 
     # Help
-    parser.add_argument('--listkeys',
+    parser.add_argument('--listkeys', action=ListKeysAction,
                         choices=['filter', 'options', 'plotkws'],
-                        action=ListKeysAction,
                         help='List default and available keys.')
-    parser.add_argument('--legend', nargs='*', type=str,
-                        help='Text for legends.')
 
     args = parser.parse_args(args)
 
-    if args.listkeys is not None:
-        return
-
     # Update the default options
-
     if args.infiles is not None:
         infiles = []
         for f in args.infiles:
@@ -114,28 +105,36 @@ def parse_args(args):
     return vars(args)
 
 
-def add_annotation(axes, string: str, annotation=True):
+def add_annotations(annotations, axes):
     default_kwargs = {'xycoords': 'axes fraction',
                       'textcoords': 'axes fraction',
                       'va': 'bottom', 'ha': 'center',
                       'arrowprops': dict(arrowstyle='<-', lw=0.75)}
-    ax = None
 
-    tokens = string.split(':')
-    text = tokens[0]
-    kwargs = Keywords(tokens[1], **default_kwargs)
-    if len(tokens) > 2:
-        ax = tokens[2].strip('[]()').split(',')
-        ax = [int(x) for x in ax]
+    for an in annotations:
+        tokens = an.split(':')
+        text = tokens[0]
+        kwargs = Keywords(tokens[1], **default_kwargs)
+        if not hasattr(kwargs, 'xytext'):
+            kwargs.xytext = kwargs.xy
+            kwargs.arrowprops = None
 
-    if not hasattr(kwargs, 'xytext'):
-        kwargs.xytext = kwargs.xy
-        kwargs.arrowprops = None
+        if len(tokens) > 2:
+            ax = tokens[2].strip('[]()').split(',')
+            ax = [int(x) for x in ax]
+            axes[ax[0], ax[1]].annotate(text, **kwargs.get())
+        else:
+            plt.annotate(text, **kwargs.get())
 
-    if ax is not None:
-        axes[ax[0], ax[1]].annotate(text, **kwargs.get())
-    else:
-        plt.annotate(text, **kwargs.get())
+
+def add_legends(legends):
+    lines = []
+    for i, label in enumerate(legends):
+        line = mlines.Line2D([], [],
+                             color=base16_colors[i % len(base16_colors)],
+                             linewidth=0.75, label=label)
+        lines.append(line)
+    plt.legend(handles=lines, framealpha=1.0, fancybox=False)
 
 
 def calculate_required_axes(infiles):
@@ -189,18 +188,11 @@ def main(args):
 
     # Add annotations
     if args['annotate'] is not None:
-        for an in args['annotate']:
-            add_annotation(axes, an)
+        add_annotations(args['annotate'], axes)
 
     # Add legends
     if args['legend'] is not None:
-        lines = []
-        for i, label in enumerate(args['legend']):
-            line = mlines.Line2D([], [],
-                                 color=base16_colors[i % len(base16_colors)],
-                                 linewidth=0.75, label=label)
-            lines.append(line)
-        plt.legend(handles=lines, framealpha=1.0, fancybox=False)
+        add_legends(args['legend'])
 
     # Hack for pgf not recognising none as labelcolor
     plt.xlabel(args['xlabel'])
