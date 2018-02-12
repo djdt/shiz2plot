@@ -115,10 +115,3 @@ class Plot(object):
         # Label peaks
         if hasattr(self.options, 'peaklabels'):
             self.label_peaks(ax, self.options.peaklabels)
-
-        # Legend
-        # if hasattr(self.options, 'legend'):
-        #     labels = self.options.legend
-        #     ax.legend(handles=self.handles,
-        #               labels=[labels] if isinstance(labels, str) else labels,
-        #               framealpha=1.0, fancybox=False)
