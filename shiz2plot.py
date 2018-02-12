@@ -44,7 +44,8 @@ class ListKeysAction(argparse.Action):
 def parse_args(args):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='Plots Shimadzu chromatography data.')
+        description='Plots Shimadzu chromatography data.',
+        epilog='For filters, options, plotkws see listkeys.')
     # Input / output
     parser.add_argument('infiles', nargs='+',
                         metavar='<file>[:<filter>[:<options>[:<plotkws>]]]',
@@ -54,18 +55,18 @@ def parse_args(args):
     parser.add_argument('-S', '--noshow', action='store_true',
                         help='Don\'t show the image.')
     # Options
-    parser.add_argument('-s', '--scale', type=float, nargs=2,
+    parser.add_argument('--scale', type=float, nargs=2,
                         default=(0.9, 0.9),
                         help='The X and Y scale of the image.')
     parser.add_argument('-T', '--notex', action='store_true',
                         help='Don\'t use latex parameters.')
 
-    parser.add_argument('--options', type=str,
-                        metavar='<key>=<value>[,...]',
-                        help='Options that apply to all files.')
     parser.add_argument('--filter', type=str,
                         metavar='<key>=<value>[,...]',
                         help='Filter all files.')
+    parser.add_argument('--options', type=str,
+                        metavar='<key>=<value>[,...]',
+                        help='Options that apply to all files.')
     parser.add_argument('--plotkws', type=str,
                         metavar='<key>=<value>[,...]',
                         help='Key and values to pass to plots.')
