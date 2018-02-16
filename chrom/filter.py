@@ -1,5 +1,5 @@
 from chrom.file import File
-from chrom.kvparser import KeyValParser
+from util.kvparser import KeyValParser
 
 
 class Filter(KeyValParser):

@@ -1,4 +1,4 @@
-from chrom.kvparser import KeyValParser
+from util.kvparser import KeyValParser
 
 
 class Options(KeyValParser):

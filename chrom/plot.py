@@ -89,7 +89,7 @@ class Plot(object):
             return times, responses
 
     def plot(self, axes):
-        plotkws = self.plotkws.__dict__.copy()
+        plotkws = self.plotkws.get().copy()
         ax = self.assign_axis(axes)
         # Filter traces and plot them
         for i, trace in enumerate(self.filter.filter(self.file)):

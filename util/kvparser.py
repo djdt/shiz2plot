@@ -1,4 +1,5 @@
 import re
+from util.valueparse import convert_string_values
 
 
 class KeyValParser(object):
@@ -45,10 +46,7 @@ class KeyValParser(object):
             if not self._key_is_valid(key):
                 raise KeyError(key, self.__class__)
 
-            vals = vals.strip('[]()').split(',')
-            vals = [self._convert_value(x) for x in vals]
-            if len(vals) == 1:
-                vals = vals[0]
+            vals = convert_string_values(vals)
 
             if overwrite or not hasattr(self, key):
                 setattr(self, key, vals)
