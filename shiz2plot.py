@@ -51,6 +51,8 @@ def parse_args(args):
     parser.add_argument('infiles', nargs='+',
                         metavar='<file>[:<filter>[:<options>[:<plotkws>]]]',
                         help='Input files and options.')
+    # parser.add_argument('-c', '--config',
+    #                     help='Import options from a config file.')
     parser.add_argument('-o', '--output',
                         help='Output filename and format.')
     parser.add_argument('-S', '--noshow', action='store_true',
@@ -87,6 +89,10 @@ def parse_args(args):
                         help='List default and available keys.')
 
     args = parser.parse_args(args)
+
+    # Import the config if it exists
+    if args.config is not None:
+        pass
 
     # Update the default options
     if args.infiles is not None:
