@@ -1,5 +1,6 @@
 from chrom.file import File
 from util.kvparser import KeyValParser
+from util.valueparse import is_or_in_either
 
 
 class Filter(KeyValParser):
@@ -35,8 +36,9 @@ class Filter(KeyValParser):
                     return []
             else:
                 for trace in file.traces:  # Check key in traces
-                    if hasattr(trace, key) and \
-                       getattr(trace, key) in getattr(self, key):
-                        key_found = True
-                        filtered.append(trace)
+                    if hasattr(trace, key):
+                        if is_or_in_either(getattr(self, key),
+                                           getattr(trace, key)):
+                            key_found = True
+                            filtered.append(trace)
         return filtered if key_found else file.traces

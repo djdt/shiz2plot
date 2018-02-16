@@ -91,8 +91,8 @@ def parse_args(args):
     args = parser.parse_args(args)
 
     # Import the config if it exists
-    if args.config is not None:
-        pass
+    # if args.config is not None:
+    #     pass
 
     # Update the default options
     if args.infiles is not None:
