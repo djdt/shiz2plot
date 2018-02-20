@@ -14,28 +14,28 @@ from chrom.keywords import Keywords
 
 import util.latex as latex
 from util.colors import base16_colors
+from util.config import import_chrom_config
 
-DEFAULT_FILTER = {}
-DEFAULT_OPTIONS = {"colorby": "channel"}
-DEFAULT_PLOTKWS = {"linewidth": 0.75}
+DEFAULTS = {'filter': {},
+            'options': {"colorby": "channel"},
+            'plotkws': {"linewidth": 0.75},
+            }
 
 
 class ListKeysAction(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
+
         if values == 'filter':
-            defaults = DEFAULT_FILTER
             valid = Filter.VALID_KEYS
         elif values == 'options':
-            defaults = DEFAULT_OPTIONS
             valid = Options.VALID_KEYS
         elif values == 'plotkws':
-            defaults = DEFAULT_PLOTKWS
             valid = {}  # Needs to be implemented
 
         print("default key/values:")
         print("\t" + "\n\t".join("{} -> {}".format(
-              k, v) for k, v in defaults.items()))
+              k, v) for k, v in DEFAULTS[values].items()))
         print("valid keys:")
         print("\t" + "\n\t".join("{} -> {}".format(
               k, v) for k, v in valid.items()))
@@ -51,8 +51,8 @@ def parse_args(args):
     parser.add_argument('infiles', nargs='+',
                         metavar='<file>[:<filter>[:<options>[:<plotkws>]]]',
                         help='Input files and options.')
-    # parser.add_argument('-c', '--config',
-    #                     help='Import options from a config file.')
+    parser.add_argument('-c', '--config',
+                        help='Import options from a config file.')
     parser.add_argument('-o', '--output',
                         help='Output filename and format.')
     parser.add_argument('-S', '--noshow', action='store_true',
@@ -91,8 +91,10 @@ def parse_args(args):
     args = parser.parse_args(args)
 
     # Import the config if it exists
-    # if args.config is not None:
-    #     pass
+    if args.config is not None:
+        defaults = import_chrom_config(args.config)
+        for key, vals in defaults.items():
+            DEFAULTS[key].update(vals)
 
     # Update the default options
     if args.infiles is not None:
@@ -101,8 +103,8 @@ def parse_args(args):
             try:
                 infiles.append(
                     Plot(f, Filter(args.filter),
-                         Options(args.options, **DEFAULT_OPTIONS),
-                         Keywords(args.plotkws, **DEFAULT_PLOTKWS)))
+                         Options(args.options, **DEFAULTS['options']),
+                         Keywords(args.plotkws, **DEFAULTS['plotkws'])))
             except KeyError as e:
                 parser.error("Invalid {} key \'{}\'".format(
                     e.args[1].__name__, e.args[0]))
