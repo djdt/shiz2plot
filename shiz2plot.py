@@ -102,7 +102,7 @@ def parse_args(args):
         for f in args.infiles:
             try:
                 infiles.append(
-                    Plot(f, Filter(args.filter),
+                    Plot(f, Filter(args.filter, **DEFAULTS['filter']),
                          Options(args.options, **DEFAULTS['options']),
                          Keywords(args.plotkws, **DEFAULTS['plotkws'])))
             except KeyError as e:

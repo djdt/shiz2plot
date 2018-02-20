@@ -6,7 +6,7 @@ def import_chrom_config(conf_file: str):
     cfg = configparser.ConfigParser()
     cfg.read(conf_file)
 
-    defaults = {}
+    defaults = {'filter': {}, 'options': {}, 'plotkws': {}}
 
     if 'FILTER' in cfg:
         for k, v in cfg['FILTER'].items():
