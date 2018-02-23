@@ -81,7 +81,8 @@ class File(object):
                     # Extract trace information
                     tracedata = Trace()
                     line = fp.readline().rstrip()
-                    m_type = re.match('m/z.(\d)-(\d)MS\(E(.)\)\s*(.*$)', line)
+                    m_type = re.match('m/z.(\d+)-(\d+)MS\(E(.)\)\s*(.*$)',
+                                      line)
                     tracedata.event = int(m_type.group(2))
                     tracedata.ion_mode = m_type.group(3)
                     # Check if MRM or TIC
