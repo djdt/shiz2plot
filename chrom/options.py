@@ -9,7 +9,7 @@ class Options(KeyValParser):
         "shift": "(float, float) shift the plot data.",
         "legend": "legend entries for the plot.",
         "name": "(str) name of the plot.",
-        "peaklabels": "(list) labels for peaks, from left.",
+        "peaklabels": "(list) labels for events.",
         "smooth": "(int) smooth data with \'int\' order."
     }
     """Stores per-file options for plotting."""
