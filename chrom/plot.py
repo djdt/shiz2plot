@@ -60,7 +60,7 @@ class Plot(object):
             return "#000000"
 
     def label_peaks(self, ax, labels, by='event'):
-        for i, label in enumerate(labels):
+        for i, label in enumerate(labels, 1):
             xy = (0, 0)
             for trace in self.filter.filter(self.file):
                 if getattr(trace, by) == i:

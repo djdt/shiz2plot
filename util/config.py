@@ -1,21 +1,34 @@
-import configparser
+import yaml
 from util.valueparse import convert_string_values
 
 
-def import_chrom_config(conf_file: str):
-    cfg = configparser.ConfigParser()
-    cfg.read(conf_file)
+def stringify_dict(d: dict):
+    return ",".join(["{}={}".format(k, v) for k, v in d.items()])
+
+
+def import_cfg(path: str):
 
     defaults = {'filter': {}, 'options': {}, 'plotkws': {}}
+    files = []
 
-    if 'FILTER' in cfg:
-        for k, v in cfg['FILTER'].items():
-            defaults['filter'][k] = convert_string_values(v)
-    if 'OPTIONS' in cfg:
-        for k, v in cfg['OPTIONS'].items():
-            defaults['options'][k] = convert_string_values(v)
-    if 'PLOTKWS' in cfg:
-        for k, v in cfg['PLOTKWS'].items():
-            defaults['plotkws'][k] = convert_string_values(v)
+    with open(path, 'r') as fp:
+        cfg = yaml.load(fp)
 
-    return defaults
+        for key, val in cfg.items():
+            if key in defaults.keys():
+                defaults[key] = {k.lower(): convert_string_values(v)
+                                 for k, v in val.items()}
+            else:
+                file = {'filter': {}, 'options': {}, 'plotkws': {}}
+                for fkey in file.keys():
+                    try:
+                        file[fkey] = val[fkey]
+                    except KeyError:
+                        pass
+                files.append("{}:{}:{}:{}".format(
+                    key,
+                    stringify_dict(file['filter']),
+                    stringify_dict(file['options']),
+                    stringify_dict(file['plotkws'])))
+
+    return files, defaults

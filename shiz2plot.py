@@ -14,11 +14,11 @@ from chrom.keywords import Keywords
 
 import util.latex as latex
 from util.colors import base16_colors
-from util.config import import_chrom_config
+from util.config import import_cfg
 
 DEFAULTS = {'filter': {},
-            'options': {"colorby": "channel"},
-            'plotkws': {"linewidth": 0.75},
+            'options': {'colorby': 'channel'},
+            'plotkws': {'linewidth': 0.75},
             }
 
 
@@ -48,11 +48,12 @@ def parse_args(args):
         description='Plots Shimadzu chromatography data.',
         epilog='For filters, options, plotkws see listkeys.')
     # Input / output
-    parser.add_argument('infiles', nargs='+',
+    parser.add_argument('infiles', nargs='*',
                         metavar='<file>[:<filter>[:<options>[:<plotkws>]]]',
                         help='Input files and options.')
     parser.add_argument('-c', '--config',
-                        help='Import options from a config file.')
+                        help='Import options from a config file,'
+                        ' ignores other inputs.')
     parser.add_argument('-o', '--output',
                         help='Output filename and format.')
     parser.add_argument('-S', '--noshow', action='store_true',
@@ -92,11 +93,12 @@ def parse_args(args):
 
     # Import the config if it exists
     if args.config is not None:
-        defaults = import_chrom_config(args.config)
-        for key, vals in defaults.items():
-            DEFAULTS[key].update(vals)
+        cfgfiles, defaults = import_cfg(args.config)
+        for key, val in defaults.items():
+            DEFAULTS[key].update(val)
+        args.infiles.extend(cfgfiles)
 
-    # Update the default options
+    # Parse infiles and update the default options
     if args.infiles is not None:
         infiles = []
         for f in args.infiles:
