@@ -1,4 +1,4 @@
-from chrom.file import File
+from chrom.file import File, Trace
 from util.kvparser import KeyValParser
 from util.valueparse import is_or_in_either
 
@@ -25,20 +25,25 @@ class Filter(KeyValParser):
     def _key_is_valid(self, key):
         return key in Filter.VALID_KEYS.keys()
 
-    def filter(self, file: File):
-        key_found = False
-        filtered = []
+    def _check_key(self, key, obj):
+        if hasattr(obj, key) and is_or_in_either(getattr(self, key),
+                                                 getattr(obj, key)):
+            return True
+        return False
+
+    def _filter_trace(self, trace: Trace):
         for key in self.get():
-            if hasattr(file, key):  # Check key in file
-                if getattr(file, key) in getattr(self, key):
-                    return file.traces
-                else:
+            if hasattr(trace, key):
+                if not is_or_in_either(getattr(self, key),
+                                       getattr(trace, key)):
+                    return False
+        return True
+
+    def filter(self, file: File):
+        for key in self.get():
+            if hasattr(file, key):
+                if not is_or_in_either(getattr(self, key),
+                                       getattr(file, key)):
                     return []
-            else:
-                for trace in file.traces:  # Check key in traces
-                    if hasattr(trace, key):
-                        if is_or_in_either(getattr(self, key),
-                                           getattr(trace, key)):
-                            key_found = True
-                            filtered.append(trace)
-        return filtered if key_found else file.traces
+
+        return [t for t in file.traces if self._filter_trace(t)]
