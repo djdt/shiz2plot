@@ -112,6 +112,9 @@ def parse_args(args):
                     e.args[1].__name__, e.args[0]))
         args.infiles = infiles
 
+    if len(args.infiles) == 0:
+        parser.error("No input files detected!")
+
     return vars(args)
 
 
