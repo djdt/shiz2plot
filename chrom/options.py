@@ -7,6 +7,8 @@ class Options(KeyValParser):
         "colorby": "(str) attribute used to determine color.",
         "scale": "(float, float) scale the plot data.",
         "shift": "(float, float) shift the plot data.",
+        "xlim": "(float, float) define x limits for the data.",
+        "ylim": "(float, float) define y limits for the data.",
         "legend": "legend entries for the plot.",
         "name": "(str) name of the plot.",
         "peaklabels": "(list) labels for peaks, from left.",

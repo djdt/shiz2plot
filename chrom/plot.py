@@ -97,6 +97,11 @@ class Plot(object):
             if not hasattr(self.plotkws, 'color'):
                 plotkws['color'] = self.get_color(trace)
 
+            # Adjust limits is nessecary
+            if hasattr(self.options, 'xlim'):
+                ax.set_xlim(self.options.xlim)
+            if hasattr(self.options, 'ylim'):
+                ax.set_ylim(self.options.ylim)
             # Plot the traces and store handles
             handle, = ax.plot(*self.shift_and_scale(trace),
                               **plotkws)
