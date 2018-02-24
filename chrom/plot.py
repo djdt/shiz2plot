@@ -108,11 +108,8 @@ class Plot(object):
             self.handles.append(handle)
 
         # Add the names
-        if hasattr(self.options, 'name'):
-            name = self.options.name
-        else:
-            name = self.file.name
-        ax.annotate(name,
+        ax.annotate(self.options.name if hasattr(self.options, 'name')
+                    else self.file.name,
                     xy=(1, 1), xycoords='axes fraction',
                     xytext=(-5, -5), textcoords='offset points',
                     fontsize=10, ha='right', va='top')
