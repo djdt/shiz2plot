@@ -11,7 +11,7 @@ class Options(KeyValParser):
         "ylim": "(float, float) define y limits for the data.",
         "legend": "legend entries for the plot.",
         "name": "(str) name of the plot.",
-        "peaklabels": "(list) labels for events.",
+        "peaklabels": "(list) labels for peaks, from left.",
         "smooth": "(int) smooth data with \'int\' order."
     }
     """Stores per-file options for plotting."""

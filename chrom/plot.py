@@ -60,10 +60,14 @@ class Plot(object):
             return "#000000"
 
     def label_peaks(self, ax, labels, by='event'):
-        for i, label in enumerate(labels, 1):
+        # if only using certain filtered 'by' params
+        groups = getattr(self.filter, by) if \
+                 hasattr(self.filter, by) else range(1, len(labels))
+
+        for label, group in zip(labels, groups):
             xy = (0, 0)
             for trace in self.filter.filter(self.file):
-                if getattr(trace, by) == i:
+                if getattr(trace, by) == group:
                     peak = trace.detect_peak()
                     if peak[1] > xy[1]:
                         xy = peak
