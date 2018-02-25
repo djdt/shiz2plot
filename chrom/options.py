@@ -3,7 +3,7 @@ from util.kvparser import KeyValParser
 
 class Options(KeyValParser):
     VALID_KEYS = {
-        "axis": "(int, int) position of the plot.",
+        "axis": "(int, int) x, y position of the plot.",
         "colorby": "(str) attribute used to determine color.",
         "scale": "(float, float) scale the plot data.",
         "shift": "(float, float) shift the plot data.",

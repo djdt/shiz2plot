@@ -154,10 +154,10 @@ def calculate_required_axes(infiles):
     nrows, ncols = 0, 0
     for f in infiles:
         if hasattr(f.options, 'axis'):
-            if f.options.axis[0] > nrows:
-                nrows = f.options.axis[0]
-            if f.options.axis[1] > ncols:
-                ncols = f.options.axis[1]
+            if f.options.axis[1] > nrows:
+                nrows = f.options.axis[1]
+            if f.options.axis[0] > ncols:
+                ncols = f.options.axis[0]
         else:
             if f.file.fileid > nrows:
                 nrows = f.file.fileid

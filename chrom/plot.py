@@ -42,7 +42,7 @@ class Plot(object):
 
     def assign_axis(self, axes):
         if hasattr(self.options, 'axis'):
-            return axes[self.options.axis[0], self.options.axis[1]]
+            return axes[self.options.axis[1], self.options.axis[0]]
         else:
             return axes[self.file.fileid, 0]
 
