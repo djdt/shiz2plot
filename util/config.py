@@ -14,11 +14,12 @@ def import_cfg(path: str):
     with open(path, 'r') as fp:
         cfg = yaml.load(fp)
 
-        for key, val in cfg.items():
+        for key in cfg.keys():
             if key in defaults.keys():
                 defaults[key] = {k.lower(): convert_string_values(v)
-                                 for k, v in val.items()}
-            else:
+                                 for k, v in cfg[key].items()}
+        if 'files' in cfg.keys():
+            for key, val in cfg['files'].items():
                 file = {'filter': {}, 'options': {}, 'plotkws': {}}
                 for fkey in file.keys():
                     try:
@@ -26,7 +27,7 @@ def import_cfg(path: str):
                     except KeyError:
                         pass
                 files.append("{}:{}:{}:{}".format(
-                    key,
+                    val['path'],
                     stringify_dict(file['filter']),
                     stringify_dict(file['options']),
                     stringify_dict(file['plotkws'])))
