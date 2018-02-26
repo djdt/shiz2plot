@@ -12,12 +12,15 @@ def import_cfg(path: str):
     files = []
 
     with open(path, 'r') as fp:
-        cfg = yaml.load(fp)
+        cfg = yaml.load(fp, Loader=yaml.BaseLoader)
 
         for key in cfg.keys():
             if key in defaults.keys():
-                defaults[key] = {k.lower(): convert_string_values(v)
-                                 for k, v in cfg[key].items()}
+                try:
+                    defaults[key] = {k.lower(): convert_string_values(v)
+                                     for k, v in cfg[key].items()}
+                except (IndexError, TypeError) as e:
+                    print(key, e)
         if 'files' in cfg.keys():
             for key, val in cfg['files'].items():
                 file = {'filter': {}, 'options': {}, 'plotkws': {}}

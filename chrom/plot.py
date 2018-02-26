@@ -6,13 +6,14 @@ from chrom.filter import Filter
 from chrom.keywords import Keywords
 
 from util.colors import base16_colors
+from util.config import import_cfg
 
 
 class Plot(object):
     def __init__(self, string: str, default_filter: Filter,
                  default_options: Options,
                  default_poltkws: Keywords):
-        """Format for string is <filename>[:<filter>[:<options>[:<plotkw>]]]"""
+        """Format for string is <filename>[:<filter>[:<options>[:<plotkw>[:<config>]]]]"""
 
         self.filter = default_filter
         self.options = default_options
