@@ -12,7 +12,7 @@ class Plot(object):
     def __init__(self, string: str, default_filter: Filter,
                  default_options: Options,
                  default_poltkws: Keywords):
-        """Format for string is <filename>[:<filter>[:<options>[:<plotkw>[:<config>]]]]"""
+        """Format for string is <filename>[:<filter>[:<options>[:<plotkw>]]]"""
 
         self.filter = default_filter
         self.options = default_options
