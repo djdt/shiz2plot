@@ -27,6 +27,9 @@ def parse_value(value: str):
 
 
 def convert_string_values(values: str):
+    if len(values) == 0:
+        return ""
+
     opening = values[0]
     values = values.strip('[]()').split(',')
     values = [parse_value(x) for x in values]
