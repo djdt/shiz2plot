@@ -1,4 +1,5 @@
 import numpy
+import scipy.integrate
 
 from chrom.file import File, Trace
 from chrom.options import Options
@@ -58,6 +59,11 @@ class Plot(object):
             print("Options.gen_color: unable to find attr {}".format(
                 self.options.colorby))
             return "#000000"
+
+    def integrate_peak(self, trace: Trace):
+        result = scipy.integrate.trapz(trace.responses,
+                                       trace.times)
+        return int(result)
 
     def label_peaks(self, ax, labels, by='event'):
         # if only using certain filtered 'by' params
@@ -121,3 +127,13 @@ class Plot(object):
         # Label peaks
         if hasattr(self.options, 'peaklabels'):
             self.label_peaks(ax, self.options.peaklabels)
+
+        # Intergrate
+        if hasattr(self.options, 'integrate'):
+            for trace in self.filter.filter(self.file):
+                label = self.integrate_peak(trace)
+                xpos = trace.detect_peak()[0]
+
+                ax.annotate(label, xy=(xpos, 0), xycoords='data',
+                            xytext=(0, 0), textcoords='offset points',
+                            fontsize=8, va='bottom', ha='center')

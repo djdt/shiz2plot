@@ -9,6 +9,7 @@ class Options(KeyValParser):
         "shift": "(float, float) shift the plot data.",
         "xlim": "(float, float) define x limits for the data.",
         "ylim": "(float, float) define y limits for the data.",
+        "integrate": "(bool) intergrate peaks.",
         "legend": "legend entries for the plot.",
         "name": "(str) name of the plot.",
         "peaklabels": "(list) labels for peaks, from left.",
