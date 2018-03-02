@@ -119,7 +119,7 @@ class Plot(object):
 
         # Add the names
         ax.annotate(self.options.name if hasattr(self.options, 'name')
-                    else self.file.name,
+                    and self.options.name is not None else self.file.name,
                     xy=(1, 1), xycoords='axes fraction',
                     xytext=(-5, -5), textcoords='offset points',
                     fontsize=10, ha='right', va='top')
