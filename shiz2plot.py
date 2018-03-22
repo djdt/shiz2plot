@@ -65,11 +65,11 @@ def parse_args(args):
     parser.add_argument('-T', '--notex', action='store_true',
                         help='Don\'t use latex parameters.')
 
-    parser.add_argument('--filter', metavar='<key>=<value>,...',
+    parser.add_argument('-f', '--filter', metavar='<key>=<value>,...',
                         help='Filter all files.')
-    parser.add_argument('--options', metavar='<key>=<value>,...',
+    parser.add_argument('-p', '--options', metavar='<key>=<value>,...',
                         help='Options that apply to all files.')
-    parser.add_argument('--plotkws', metavar='<key>=<value>,...',
+    parser.add_argument('-k', '--plotkws', metavar='<key>=<value>,...',
                         help='Key and values to pass to plots.')
     # Text
     parser.add_argument('--xlabel', default='Time (\\si{\\minute})',
