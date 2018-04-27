@@ -31,8 +31,11 @@ class Trace(object):
         return self.precursor > 0.0 and self.precursor == other.precursor
 
     def detect_peak(self):
-        gradient = numpy.gradient(self.responses)
-        peak = int((numpy.argmax(gradient) + numpy.argmin(gradient)) / 2)
+        # This method doesn't work with non-symmetric peaks
+        # gradient = numpy.gradient(self.responses)
+        # peak = int((numpy.argmax(gradient) + numpy.argmin(gradient)) / 2)
+        # This method should be faster too
+        peak = numpy.argmax(self.responses)
 
         return self.times[peak], self.responses[peak]
 
@@ -81,8 +84,10 @@ class File(object):
                     # Extract trace information
                     tracedata = Trace()
                     line = fp.readline().rstrip()
-                    m_type = re.match('m/z.(\d+)-(\d+)MS\(E(.)\)\s*(.*$)',
+                    m_type = re.match('m/z.(\d+)-(\d+)MS\(\w(.)\)\s*(.*$)',
                                       line)
+                    if m_type is None:
+                        print(line)
                     tracedata.event = int(m_type.group(2))
                     tracedata.ion_mode = m_type.group(3)
                     # Check if MRM or TIC
