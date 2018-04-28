@@ -59,6 +59,8 @@ def parse_args(args):
     parser.add_argument('-S', '--noshow', action='store_true',
                         help='Don\'t show the image.')
     # Options
+    parser.add_argument('--dpi', type=float, default=None,
+                        help='DPI of the figure.')
     parser.add_argument('--scale', nargs=2, type=float,
                         default=(0.9, 0.9), metavar=('X', 'Y'),
                         help='The figure scale.')
@@ -185,6 +187,7 @@ def main(args):
     fig, axes = plt.subplots(*calculate_required_axes(args['infiles']),
                              squeeze=False,
                              figsize=latex.size(*args['scale']),
+                             dpi=args['dpi'],
                              sharex=True, sharey=True,
                              subplot_kw=subplot_kw,
                              gridspec_kw={'wspace': 0, 'hspace': 0})
