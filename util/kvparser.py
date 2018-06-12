@@ -30,6 +30,9 @@ class KeyValParser(object):
     def _key_is_valid(self, key):
         return True
 
+    def _lookup_key(self, key, vals):
+        return vals
+
     def parse(self, string: str, overwrite=True):
         """Parse a string and add values.
             string -> (string) comma separated list of <key>=<val>.
@@ -47,6 +50,7 @@ class KeyValParser(object):
                 raise KeyError(key, self.__class__)
 
             vals = convert_string_values(vals)
+            vals = self._lookup_key(key, vals)
 
             if overwrite or not hasattr(self, key):
                 setattr(self, key, vals)

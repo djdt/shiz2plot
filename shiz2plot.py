@@ -208,7 +208,6 @@ def main(args):
         add_legends(args['legend'])
 
     # Hack for pgf not recognising none as labelcolor
-    plt.xlabel(args['xlabel'])
     if args['output'] and args['output'].endswith('pgf'):
         set_shared_ylabel(args['ylabel'], axes, fig)
     else:
@@ -216,6 +215,7 @@ def main(args):
         plt.tick_params(labelcolor='none',
                         top='off', bottom='off', left='off', right='off')
         plt.ylabel(args['ylabel'])
+    plt.xlabel(args['xlabel'])
 
     # Remove uneeded withspace
     plt.tight_layout()
