@@ -74,7 +74,7 @@ def parse_args(args):
     parser.add_argument('-k', '--plotkws', metavar='<key>=<value>,...',
                         help='Key and values to pass to plots.')
     # Text
-    parser.add_argument('--xlabel', default='Time (\\si{\\minute})',
+    parser.add_argument('--xlabel', default='Time (min)',
                         help='X-axis label.')
     parser.add_argument('--ylabel', default='Response',
                         help='Y-axis label.')
@@ -113,6 +113,10 @@ def parse_args(args):
                 parser.error("Invalid {} key \'{}\'".format(
                     e.args[1].__name__, e.args[0]))
         args.infiles = infiles
+
+    # Latex is used then change the default x-title
+    if not args.notex and args.xlabel == 'Time (min)':
+        args.xlabel = 'Time (\\si{j\minute})'
 
     if len(args.infiles) == 0:
         parser.error("No input files detected!")
