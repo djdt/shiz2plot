@@ -84,7 +84,7 @@ class File(object):
                     # Extract trace information
                     tracedata = Trace()
                     line = fp.readline().rstrip()
-                    m_type = re.match('m/z.(\d+)-(\d+)MS\(\w(.)\)\s*(.*$)',
+                    m_type = re.match('m/z.(\d+)-(\d+)MS\([ED](.)\)\s*(.*$)',
                                       line)
                     if m_type is None:
                         print(line)
