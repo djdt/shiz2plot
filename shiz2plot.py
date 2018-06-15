@@ -116,7 +116,7 @@ def parse_args(args):
 
     # Latex is used then change the default x-title
     if not args.notex and args.xlabel == 'Time (min)':
-        args.xlabel = 'Time (\\si{j\minute})'
+        args.xlabel = 'Time (\\si{\\minute})'
 
     if len(args.infiles) == 0:
         parser.error("No input files detected!")
