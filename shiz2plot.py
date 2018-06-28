@@ -59,6 +59,8 @@ def parse_args(args):
     parser.add_argument('-S', '--noshow', action='store_true',
                         help='Don\'t show the image.')
     # Options
+    parser.add_argument('--hstack', action='store_true',
+                        help='Stack plots horizontally.')
     parser.add_argument('--dpi', type=float, default=None,
                         help='DPI of the figure.')
     parser.add_argument('--scale', nargs=2, type=float,
@@ -156,7 +158,7 @@ def add_legends(legends):
     plt.legend(handles=lines, framealpha=1.0, fancybox=False)
 
 
-def calculate_required_axes(infiles):
+def calculate_required_axes(infiles, hstack=False):
     nrows, ncols = 0, 0
     for f in infiles:
         if hasattr(f.options, 'axis'):
@@ -165,8 +167,12 @@ def calculate_required_axes(infiles):
             if f.options.axis[0] > ncols:
                 ncols = f.options.axis[0]
         else:
-            if f.file.fileid > nrows:
-                nrows = f.file.fileid
+            if hstack:
+                if f.file.fileid > nrows:
+                    nrows = f.file.fileid
+            else:
+                if f.file.fileid > ncols:
+                    ncols = f.file.fileid
     return nrows + 1, ncols + 1
 
 
@@ -188,7 +194,8 @@ def main(args):
         latex.plot_options()
 
     # Calculated required axes
-    fig, axes = plt.subplots(*calculate_required_axes(args['infiles']),
+    fig, axes = plt.subplots(*calculate_required_axes(args['infiles'],
+                                                      args['hstack']),
                              squeeze=False,
                              figsize=latex.size(*args['scale']),
                              dpi=args['dpi'],
