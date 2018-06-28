@@ -45,8 +45,8 @@ class Plot(object):
         if hasattr(self.options, 'axis'):
             return axes[self.options.axis[1], self.options.axis[0]]
         else:
-            return axes[self.file.fileid, 0] if hstack else \
-                   axes[0, self.file.fileid]
+            return axes[0, self.file.fileid] if hstack else \
+                   axes[self.file.fileid, 0]
 
     def get_color(self, trace: Trace, colors=base16_colors):
         if hasattr(self.file, self.options.colorby):

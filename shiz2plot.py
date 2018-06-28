@@ -168,11 +168,11 @@ def calculate_required_axes(infiles, hstack=False):
                 ncols = f.options.axis[0]
         else:
             if hstack:
-                if f.file.fileid > nrows:
-                    nrows = f.file.fileid
-            else:
                 if f.file.fileid > ncols:
                     ncols = f.file.fileid
+            else:
+                if f.file.fileid > nrows:
+                    nrows = f.file.fileid
     return nrows + 1, ncols + 1
 
 
@@ -205,7 +205,7 @@ def main(args):
 
     # Plot data
     for f in args['infiles']:
-        f.plot(axes)
+        f.plot(axes, args['hstack'])
 
     # Cleanup axes
     for ax in axes.flatten():
