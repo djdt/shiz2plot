@@ -59,7 +59,7 @@ def parse_args(args):
     parser.add_argument('-S', '--noshow', action='store_true',
                         help='Don\'t show the image.')
     # Options
-    parser.add_argument('--dpi', type=float, default=None,
+    parser.add_argument('--dpi', type=float, default=300,
                         help='DPI of the figure.')
     parser.add_argument('--scale', nargs=2, type=float,
                         default=(0.9, 0.9), metavar=('X', 'Y'),
@@ -211,7 +211,6 @@ def main(args):
         add_legends(args['legend'])
 
     # Hack for pgf not recognising none as labelcolor
-    plt.xlabel(args['xlabel'])
     if args['output'] and args['output'].endswith('pgf'):
         set_shared_ylabel(args['ylabel'], axes, fig)
     else:
@@ -219,6 +218,11 @@ def main(args):
         plt.tick_params(labelcolor='none',
                         top='off', bottom='off', left='off', right='off')
         plt.ylabel(args['ylabel'])
+
+    # Change default label if needed
+    if args['notex'] and args['xlabel'] == 'Time (\\si{\\minute})':
+        args['xlabel'] = 'Time (min)'
+    plt.xlabel(args['xlabel'])
 
     # Remove uneeded withspace
     plt.tight_layout()
