@@ -118,11 +118,12 @@ class Plot(object):
             self.handles.append(handle)
 
         # Add the names
-        ax.annotate(self.options.name if hasattr(self.options, 'name')
-                    and self.options.name is not None else self.file.name,
-                    xy=(1, 1), xycoords='axes fraction',
-                    xytext=(-5, -5), textcoords='offset points',
-                    fontsize=10, ha='right', va='top')
+        if hasattr(self.options, 'name'):
+            ax.annotate(self.file.name if self.options.name is None
+                        else self.options.name,
+                        xy=(1, 1), xycoords='axes fraction',
+                        xytext=(-5, -5), textcoords='offset points',
+                        fontsize=10, ha='right', va='top')
 
         # Label peaks
         if hasattr(self.options, 'peaklabels'):
