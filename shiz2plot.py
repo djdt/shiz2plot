@@ -59,6 +59,8 @@ def parse_args(args):
     parser.add_argument('-S', '--noshow', action='store_true',
                         help='Don\'t show the image.')
     # Options
+    parser.add_argument('--hstack', action='store_true',
+                        help='Stack plots horizontally.')
     parser.add_argument('--dpi', type=float, default=300,
                         help='DPI of the figure.')
     parser.add_argument('--scale', nargs=2, type=float,
@@ -74,7 +76,7 @@ def parse_args(args):
     parser.add_argument('-k', '--plotkws', metavar='<key>=<value>,...',
                         help='Key and values to pass to plots.')
     # Text
-    parser.add_argument('--xlabel', default='Time (\\si{\\minute})',
+    parser.add_argument('--xlabel', default='Time (min)',
                         help='X-axis label.')
     parser.add_argument('--ylabel', default='Response',
                         help='Y-axis label.')
@@ -114,6 +116,10 @@ def parse_args(args):
                     e.args[1].__name__, e.args[0]))
         args.infiles = infiles
 
+    # Latex is used then change the default x-title
+    if not args.notex and args.xlabel == 'Time (min)':
+        args.xlabel = 'Time (\\si{\\minute})'
+
     if len(args.infiles) == 0:
         parser.error("No input files detected!")
 
@@ -152,7 +158,7 @@ def add_legends(legends):
     plt.legend(handles=lines, framealpha=1.0, fancybox=False)
 
 
-def calculate_required_axes(infiles):
+def calculate_required_axes(infiles, hstack=False):
     nrows, ncols = 0, 0
     for f in infiles:
         if hasattr(f.options, 'axis'):
@@ -161,8 +167,12 @@ def calculate_required_axes(infiles):
             if f.options.axis[0] > ncols:
                 ncols = f.options.axis[0]
         else:
-            if f.file.fileid > nrows:
-                nrows = f.file.fileid
+            if hstack:
+                if f.file.fileid > ncols:
+                    ncols = f.file.fileid
+            else:
+                if f.file.fileid > nrows:
+                    nrows = f.file.fileid
     return nrows + 1, ncols + 1
 
 
@@ -184,7 +194,8 @@ def main(args):
         latex.plot_options()
 
     # Calculated required axes
-    fig, axes = plt.subplots(*calculate_required_axes(args['infiles']),
+    fig, axes = plt.subplots(*calculate_required_axes(args['infiles'],
+                                                      args['hstack']),
                              squeeze=False,
                              figsize=latex.size(*args['scale']),
                              dpi=args['dpi'],
@@ -194,7 +205,7 @@ def main(args):
 
     # Plot data
     for f in args['infiles']:
-        f.plot(axes)
+        f.plot(axes, args['hstack'])
 
     # Cleanup axes
     for ax in axes.flatten():
@@ -218,6 +229,7 @@ def main(args):
         plt.tick_params(labelcolor='none',
                         top='off', bottom='off', left='off', right='off')
         plt.ylabel(args['ylabel'])
+    plt.xlabel(args['xlabel'])
 
     # Change default label if needed
     if args['notex'] and args['xlabel'] == 'Time (\\si{\\minute})':

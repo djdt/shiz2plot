@@ -41,11 +41,12 @@ class Plot(object):
         if len(tokens) > 3:
             self.plotkws.parse(tokens[3])
 
-    def assign_axis(self, axes):
+    def assign_axis(self, axes, hstack=False):
         if hasattr(self.options, 'axis'):
             return axes[self.options.axis[1], self.options.axis[0]]
         else:
-            return axes[self.file.fileid, 0]
+            return axes[0, self.file.fileid] if hstack else \
+                   axes[self.file.fileid, 0]
 
     def get_color(self, trace: Trace, colors=base16_colors):
         if hasattr(self.file, self.options.colorby):
@@ -98,9 +99,9 @@ class Plot(object):
                                out=responses)
             return times, responses
 
-    def plot(self, axes):
+    def plot(self, axes, hstack=False):
         plotkws = self.plotkws.get().copy()
-        ax = self.assign_axis(axes)
+        ax = self.assign_axis(axes, hstack)
         # Filter traces and plot them
         for i, trace in enumerate(self.filter.filter(self.file)):
             # Create color for trace if needed
