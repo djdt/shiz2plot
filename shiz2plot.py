@@ -213,6 +213,11 @@ def main(args):
     for ax in axes.flatten()[1:]:
         ax.yaxis.offsetText.set_visible(False)
 
+    # Remove top and right spines
+    for ax in axes:
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+
     # Add annotations
     if args['annotate'] is not None:
         add_annotations(args['annotate'], axes)
