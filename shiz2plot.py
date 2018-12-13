@@ -16,82 +16,109 @@ import util.latex as latex
 from util.colors import base16_colors
 from util.config import import_cfg
 
-DEFAULTS = {'filter': {},
-            'options': {'colorby': 'channel'},
-            'plotkws': {'linewidth': 0.75},
-            }
+DEFAULTS = {
+    "filter": {},
+    "options": {"colorby": "channel"},
+    "plotkws": {"linewidth": 0.75},
+}
 
 
 class ListKeysAction(argparse.Action):
-
     def __call__(self, parser, namespace, values, option_string=None):
 
-        if values == 'filter':
+        if values == "filter":
             valid = Filter.VALID_KEYS
-        elif values == 'options':
+        elif values == "options":
             valid = Options.VALID_KEYS
-        elif values == 'plotkws':
+        elif values == "plotkws":
             valid = {}  # Needs to be implemented
 
         print("default key/values:")
-        print("\t" + "\n\t".join("{} -> {}".format(
-              k, v) for k, v in DEFAULTS[values].items()))
+        print(
+            "\t"
+            + "\n\t".join("{} -> {}".format(k, v) for k, v in DEFAULTS[values].items())
+        )
         print("valid keys:")
-        print("\t" + "\n\t".join("{} -> {}".format(
-              k, v) for k, v in valid.items()))
+        print("\t" + "\n\t".join("{} -> {}".format(k, v) for k, v in valid.items()))
 
         parser.exit()
 
 
 def parse_args(args):
     parser = argparse.ArgumentParser(
-        description='Plots Shimadzu chromatography data.',
-        epilog='For filters, options, plotkws see listkeys.')
+        description="Plots Shimadzu chromatography data.",
+        epilog="For filters, options, plotkws see listkeys.",
+    )
     # Input / output
-    parser.add_argument('infiles', nargs='*',
-                        metavar='<file>[:<filter>[:<options>[:<plotkws>]]]',
-                        help='Input files and options.')
-    parser.add_argument('-c', '--config',
-                        help='Import options from a config file,'
-                        ' ignores other inputs.')
-    parser.add_argument('-o', '--output',
-                        help='Output filename and format.')
-    parser.add_argument('-S', '--noshow', action='store_true',
-                        help='Don\'t show the image.')
+    parser.add_argument(
+        "infiles",
+        nargs="*",
+        metavar="<file>[:<filter>[:<options>[:<plotkws>]]]",
+        help="Input files and options.",
+    )
+    parser.add_argument(
+        "-c",
+        "--config",
+        help="Import options from a config file," " ignores other inputs.",
+    )
+    parser.add_argument("-o", "--output", help="Output filename and format.")
+    parser.add_argument(
+        "-S", "--noshow", action="store_true", help="Don't show the image."
+    )
     # Options
-    parser.add_argument('--hstack', action='store_true',
-                        help='Stack plots horizontally.')
-    parser.add_argument('--dpi', type=float, default=300,
-                        help='DPI of the figure.')
-    parser.add_argument('--scale', nargs=2, type=float,
-                        default=(0.9, 0.9), metavar=('X', 'Y'),
-                        help='The figure scale.')
-    parser.add_argument('-T', '--notex', action='store_true',
-                        help='Don\'t use latex parameters.')
+    parser.add_argument(
+        "--hstack", action="store_true", help="Stack plots horizontally."
+    )
+    parser.add_argument("--dpi", type=float, default=300, help="DPI of the figure.")
+    parser.add_argument(
+        "--scale",
+        nargs=2,
+        type=float,
+        default=(0.9, 0.9),
+        metavar=("X", "Y"),
+        help="The figure scale.",
+    )
+    parser.add_argument(
+        "-T", "--notex", action="store_true", help="Don't use latex parameters."
+    )
 
-    parser.add_argument('-f', '--filter', metavar='<key>=<value>,...',
-                        help='Filter all files.')
-    parser.add_argument('-p', '--options', metavar='<key>=<value>,...',
-                        help='Options that apply to all files.')
-    parser.add_argument('-k', '--plotkws', metavar='<key>=<value>,...',
-                        help='Key and values to pass to plots.')
+    parser.add_argument(
+        "-f", "--filter", metavar="<key>=<value>,...", help="Filter all files."
+    )
+    parser.add_argument(
+        "-p",
+        "--options",
+        metavar="<key>=<value>,...",
+        help="Options that apply to all files.",
+    )
+    parser.add_argument(
+        "-k",
+        "--plotkws",
+        metavar="<key>=<value>,...",
+        help="Key and values to pass to plots.",
+    )
     # Text
-    parser.add_argument('--xlabel', default='Time (min)',
-                        help='X-axis label.')
-    parser.add_argument('--ylabel', default='Response',
-                        help='Y-axis label.')
+    parser.add_argument("--xlabel", default="Time (min)", help="X-axis label.")
+    parser.add_argument("--ylabel", default="Response", help="Y-axis label.")
 
-    parser.add_argument('--annotate', nargs='+',
-                        metavar='<text>:<key>=<value>,...:axis',
-                        help=('Add an annotation to the selected axis. '
-                              'Omit \'xytext\' if arrow is not needed.'))
-    parser.add_argument('--legend', nargs='+',
-                        help='Text for legends.')
+    parser.add_argument(
+        "--annotate",
+        nargs="+",
+        metavar="<text>:<key>=<value>,...:axis",
+        help=(
+            "Add an annotation to the selected axis. "
+            "Omit 'xytext' if arrow is not needed."
+        ),
+    )
+    parser.add_argument("--legend", nargs="+", help="Text for legends.")
 
     # Help
-    parser.add_argument('--listkeys', action=ListKeysAction,
-                        choices=['filter', 'options', 'plotkws'],
-                        help='List default and available keys.')
+    parser.add_argument(
+        "--listkeys",
+        action=ListKeysAction,
+        choices=["filter", "options", "plotkws"],
+        help="List default and available keys.",
+    )
 
     args = parser.parse_args(args)
 
@@ -108,17 +135,22 @@ def parse_args(args):
         for f in args.infiles:
             try:
                 infiles.append(
-                    Plot(f, Filter(args.filter, **DEFAULTS['filter']),
-                         Options(args.options, **DEFAULTS['options']),
-                         Keywords(args.plotkws, **DEFAULTS['plotkws'])))
+                    Plot(
+                        f,
+                        Filter(args.filter, **DEFAULTS["filter"]),
+                        Options(args.options, **DEFAULTS["options"]),
+                        Keywords(args.plotkws, **DEFAULTS["plotkws"]),
+                    )
+                )
             except KeyError as e:
-                parser.error("Invalid {} key \'{}\'".format(
-                    e.args[1].__name__, e.args[0]))
+                parser.error(
+                    "Invalid {} key '{}'".format(e.args[1].__name__, e.args[0])
+                )
         args.infiles = infiles
 
     # Latex is used then change the default x-title
-    if not args.notex and args.xlabel == 'Time (min)':
-        args.xlabel = 'Time (\\si{\\minute})'
+    if not args.notex and args.xlabel == "Time (min)":
+        args.xlabel = "Time (\\si{\\minute})"
 
     if len(args.infiles) == 0:
         parser.error("No input files detected!")
@@ -127,21 +159,24 @@ def parse_args(args):
 
 
 def add_annotations(annotations, axes):
-    default_kwargs = {'xycoords': 'axes fraction',
-                      'textcoords': 'axes fraction',
-                      'va': 'bottom', 'ha': 'center',
-                      'arrowprops': dict(arrowstyle='<-', lw=0.75)}
+    default_kwargs = {
+        "xycoords": "axes fraction",
+        "textcoords": "axes fraction",
+        "va": "bottom",
+        "ha": "center",
+        "arrowprops": dict(arrowstyle="<-", lw=0.75),
+    }
 
     for an in annotations:
-        tokens = an.split(':')
+        tokens = an.split(":")
         text = tokens[0]
         kwargs = Keywords(tokens[1], **default_kwargs)
-        if not hasattr(kwargs, 'xytext'):
+        if not hasattr(kwargs, "xytext"):
             kwargs.xytext = kwargs.xy
             kwargs.arrowprops = None
 
         if len(tokens) > 2:
-            ax = tokens[2].strip('[]()').split(',')
+            ax = tokens[2].strip("[]()").split(",")
             ax = [int(x) for x in ax]
             axes[ax[0], ax[1]].annotate(text, **kwargs.get())
         else:
@@ -151,9 +186,13 @@ def add_annotations(annotations, axes):
 def add_legends(legends):
     lines = []
     for i, label in enumerate(legends):
-        line = mlines.Line2D([], [],
-                             color=base16_colors[i % len(base16_colors)],
-                             linewidth=0.75, label=label)
+        line = mlines.Line2D(
+            [],
+            [],
+            color=base16_colors[i % len(base16_colors)],
+            linewidth=0.75,
+            label=label,
+        )
         lines.append(line)
     plt.legend(handles=lines, framealpha=1.0, fancybox=False)
 
@@ -161,7 +200,7 @@ def add_legends(legends):
 def calculate_required_axes(infiles, hstack=False):
     nrows, ncols = 0, 0
     for f in infiles:
-        if hasattr(f.options, 'axis'):
+        if hasattr(f.options, "axis"):
             if f.options.axis[1] > nrows:
                 nrows = f.options.axis[1]
             if f.options.axis[0] > ncols:
@@ -177,11 +216,14 @@ def calculate_required_axes(infiles, hstack=False):
 
 
 def set_shared_ylabel(ylabel, axes, figure):
-    bottom, top = .1, .9
-    avepos = (bottom+top)/2
+    bottom, top = 0.1, 0.9
+    avepos = (bottom + top) / 2
     # changed from default blend (IdentityTransform(), axes[0].transAxes)
-    axes[0].yaxis.label.set_transform(mtransforms.blended_transform_factory(
-           mtransforms.IdentityTransform(), figure.transFigure))
+    axes[0].yaxis.label.set_transform(
+        mtransforms.blended_transform_factory(
+            mtransforms.IdentityTransform(), figure.transFigure
+        )
+    )
     axes[0].yaxis.label.set_position((0, avepos))
     axes[0].set_ylabel(ylabel)
 
@@ -189,63 +231,69 @@ def set_shared_ylabel(ylabel, axes, figure):
 def main(args):
     args = parse_args(args)
 
-    subplot_kw = {'xlabel': '', 'ylabel': '', 'xmargin': 0}
-    if not args['notex']:
+    subplot_kw = {"xlabel": "", "ylabel": "", "xmargin": 0}
+    if not args["notex"]:
         latex.plot_options()
 
     # Calculated required axes
-    fig, axes = plt.subplots(*calculate_required_axes(args['infiles'],
-                                                      args['hstack']),
-                             squeeze=False,
-                             figsize=latex.size(*args['scale']),
-                             dpi=args['dpi'],
-                             sharex=True, sharey=True,
-                             subplot_kw=subplot_kw,
-                             gridspec_kw={'wspace': 0, 'hspace': 0})
+    fig, axes = plt.subplots(
+        *calculate_required_axes(args["infiles"], args["hstack"]),
+        squeeze=False,
+        figsize=latex.size(*args["scale"]),
+        tight_layout=True,
+        dpi=args["dpi"],
+        sharex=True,
+        sharey=True,
+        subplot_kw=subplot_kw,
+        gridspec_kw={"wspace": 0, "hspace": 0}
+    )
 
     # Plot data
-    for f in args['infiles']:
-        f.plot(axes, args['hstack'])
+    for f in args["infiles"]:
+        f.plot(axes, args["hstack"])
 
     # Cleanup axes
     for ax in axes.flatten():
-        ax.ticklabel_format(axis='y', style='sci', scilimits=(-1, 3))
+        ax.ticklabel_format(axis="y", style="sci", scilimits=(-1, 3))
         # Remove top and right spines
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
     for ax in axes.flatten()[1:]:
         ax.yaxis.offsetText.set_visible(False)
 
     # Add annotations
-    if args['annotate'] is not None:
-        add_annotations(args['annotate'], axes)
+    if args["annotate"] is not None:
+        add_annotations(args["annotate"], axes)
 
     # Add legends
-    if args['legend'] is not None:
-        add_legends(args['legend'])
+    if args["legend"] is not None:
+        add_legends(args["legend"])
 
     # Hack for pgf not recognising none as labelcolor
-    if args['output'] and args['output'].endswith('pgf'):
-        set_shared_ylabel(args['ylabel'], axes, fig)
-    else:
+    if args["output"] and args["output"].endswith("pgf"):
+        set_shared_ylabel(args["ylabel"], axes, fig)
+    elif len(axes) > 1:
         fig.add_subplot(111, frameon=False)
-        plt.tick_params(labelcolor='none',
-                        top='off', bottom='off', left='off', right='off')
-        plt.ylabel(args['ylabel'])
-    plt.xlabel(args['xlabel'])
+        plt.tick_params(
+            labelcolor="none", top="off", bottom="off", left="off", right="off"
+        )
+        plt.ylabel(args["ylabel"])
+    else:
+        plt.ylabel(args["ylabel"])
+    plt.xlabel(args["xlabel"])
 
     # Change default label if needed
-    if args['notex'] and args['xlabel'] == 'Time (\\si{\\minute})':
-        args['xlabel'] = 'Time (min)'
-    plt.xlabel(args['xlabel'])
+    if args["notex"] and args["xlabel"] == "Time (\\si{\\minute})":
+        args["xlabel"] = "Time (min)"
+    plt.xlabel(args["xlabel"])
 
     # Remove uneeded withspace
     plt.tight_layout()
 
     # Save and/or show the output
-    if args['output']:
-        plt.savefig(args['output'])
-    if not args['noshow']:
+    if args["output"]:
+        plt.savefig(args["output"])
+    if not args["noshow"]:
         plt.show()
     return
 
